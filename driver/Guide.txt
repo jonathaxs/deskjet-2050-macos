@@ -4,26 +4,37 @@ https://github.com/jonathaxs/deskjet-2050-macos
 (Português mais abaixo.)
 
 
-BEFORE YOU START
+1. INSTALL HOMEBREW (ONLY ONCE)
 
-- A Mac with Apple Silicon.
-- Homebrew installed (https://brew.sh).
-- The printer plugged in over USB and turned on.
+The installer uses Homebrew to get a library it needs. If you do not have it yet, open Terminal,
+paste the command shown at https://brew.sh and press Enter. Today that command is:
 
-If the Xcode Command Line Tools are missing, the installer opens Apple's window to install them.
-Just run the installer again when it finishes.
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+It asks for your Mac password and takes a few minutes.
 
 
-INSTALL
+2. PLUG IN THE PRINTER
+
+Connect the printer to the Mac with the USB cable and turn it on.
+
+macOS may ask whether to allow the accessory to connect. Click "Allow". If you clicked
+"Don't Allow" by mistake, unplug the cable and plug it in again to get the question back.
+
+
+3. RUN THE INSTALLER
 
 1. Double-click Install.command. A Terminal window opens and does everything.
 2. When it asks, type your Mac password and press Enter. Nothing shows up while you type.
 3. When you see "Installed", press Enter to close.
 
+If the Xcode Command Line Tools are missing, the installer opens Apple's window to install them.
+When that finishes, double-click Install.command again.
+
 The printer then shows up in the print dialog (Cmd+P) of any app.
 
 
-IF macOS BLOCKS THE FILE
+IF macOS BLOCKS INSTALL.COMMAND
 
 When this folder comes from a browser download, AirDrop or a message, macOS blocks Install.command
 the first time, because it is not signed by Apple. To allow it once:
@@ -47,26 +58,37 @@ queue, and nothing else.
 (BR) DRIVER DA HP DESKJET 2050 PARA macOS
 
 
-ANTES DE COMEÇAR
+1. INSTALE O HOMEBREW (SÓ UMA VEZ)
 
-- Um Mac com Apple Silicon.
-- O Homebrew instalado (https://brew.sh).
-- A impressora ligada na USB.
+O instalador usa o Homebrew para baixar uma biblioteca de que precisa. Se você ainda não tem, abra o
+Terminal, cole o comando que aparece em https://brew.sh e aperte Enter. Hoje esse comando é:
 
-Se faltarem as ferramentas de linha de comando do Xcode, o instalador abre a janela da Apple para
-instalar. É só rodar o instalador de novo quando terminar.
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Ele pede a senha do seu Mac e leva alguns minutos.
 
 
-INSTALAÇÃO
+2. LIGUE A IMPRESSORA
+
+Conecte a impressora ao Mac pelo cabo USB e ligue-a.
+
+O macOS pode perguntar se você permite a conexão do acessório. Clique em "Permitir". Se clicou em
+"Não Permitir" sem querer, tire o cabo e conecte de novo para a pergunta aparecer outra vez.
+
+
+3. RODE O INSTALADOR
 
 1. Dê dois cliques no Install.command. Uma janela do Terminal abre e faz tudo.
 2. Quando pedir, digite a senha do seu Mac e aperte Enter. Nada aparece enquanto você digita.
 3. Quando aparecer "Installed", aperte Enter para fechar.
 
+Se faltarem as ferramentas de linha de comando do Xcode, o instalador abre a janela da Apple para
+instalar. Quando terminar, dê dois cliques no Install.command de novo.
+
 Depois disso, a impressora aparece na janela de impressão (Cmd+P) de qualquer app.
 
 
-SE O macOS BLOQUEAR O ARQUIVO
+SE O macOS BLOQUEAR O INSTALL.COMMAND
 
 Quando esta pasta vem de um download pelo navegador, pelo AirDrop ou por mensagem, o macOS bloqueia
 o Install.command na primeira vez, porque ele não é assinado pela Apple. Para liberar uma vez:

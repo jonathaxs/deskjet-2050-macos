@@ -17,13 +17,13 @@ This project takes the `hpcups` filter from [HPLIP](https://developers.hp.com/hp
 ## Requirements
 
 - A Mac with Apple Silicon.
-- [Homebrew](https://brew.sh).
+- [Homebrew](https://brew.sh). To install it, paste the command from its site into Terminal. You only do this once.
 - Xcode Command Line Tools. If they are missing, the installer opens Apple's window to install them.
-- The printer plugged in over USB and turned on.
+- The printer plugged in over USB and turned on. If macOS asks whether to allow the accessory to connect, click **Allow**. If you clicked **Don't Allow**, unplug the cable and plug it in again.
 
 ## Install
 
-Download this repository (green **Code** button, then **Download ZIP**) or clone it with `git`. Then open the `driver` folder and double-click **`Install.command`**.
+Download the **`deskjet-2050-driver`** zip from the [latest release](https://github.com/jonathaxs/deskjet-2050-macos/releases/latest) (not the "Source code" files) and open it. Then open the `deskjet-2050-driver` folder and double-click **`Install.command`**. If you cloned the repository, the same files are in the `driver` folder.
 
 A Terminal window opens and does everything: it checks the requirements, installs jpeg-turbo with Homebrew if needed, downloads HPLIP, builds the driver and installs it. When it asks, type your Mac password and press Enter. Nothing shows up while you type, that is normal. When you see "Installed", press Enter to close.
 
@@ -137,13 +137,13 @@ Este projeto pega o filtro `hpcups` do [HPLIP](https://developers.hp.com/hp-linu
 ## Requisitos
 
 - Um Mac com Apple Silicon.
-- O [Homebrew](https://brew.sh).
+- O [Homebrew](https://brew.sh). Para instalar, cole no Terminal o comando do site dele. Isso é feito uma vez só.
 - As ferramentas de linha de comando do Xcode. Se faltarem, o instalador abre a janela da Apple para instalar.
-- A impressora ligada na USB.
+- A impressora ligada na USB. Se o macOS perguntar se você permite a conexão do acessório, clique em **Permitir**. Se clicou em **Não Permitir**, tire o cabo e conecte de novo.
 
 ## Instalação
 
-Baixe este repositório (botão verde **Code**, depois **Download ZIP**) ou clone com o `git`. Depois abra a pasta `driver` e dê dois cliques no **`Install.command`**.
+Baixe o zip **`deskjet-2050-driver`** da [versão mais recente](https://github.com/jonathaxs/deskjet-2050-macos/releases/latest) (não os arquivos "Source code") e abra. Depois abra a pasta `deskjet-2050-driver` e dê dois cliques no **`Install.command`**. Se você clonou o repositório, os mesmos arquivos estão na pasta `driver`.
 
 Uma janela do Terminal abre e faz tudo: confere os requisitos, instala o jpeg-turbo pelo Homebrew se precisar, baixa o HPLIP, compila o driver e instala. Quando pedir, digite a senha do seu Mac e aperte Enter. Nada aparece enquanto você digita, é normal. Quando aparecer "Installed", aperte Enter para fechar.
 
