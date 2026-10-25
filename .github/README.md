@@ -2,7 +2,7 @@
 
 _A native Apple Silicon driver for the HP Deskjet 2050 All-in-One (J510) on current macOS._
 
-**[Leia em português](#português-brasil)**
+**[Leia em português](#hp-deskjet-2050-para-macos)**
 
 HP no longer supports this printer on the Mac. The old official driver is Intel only and does not work on recent versions of macOS, not even with Rosetta.
 
@@ -10,7 +10,7 @@ This project takes the `hpcups` filter from [HPLIP](https://developers.hp.com/hp
 
 ## Status
 
-- **Printing over USB:** working, tested on a MacBook Pro M3 Pro with macOS 27.
+- **Printing over USB:** working, tested on macOS 27.
 - **Black and white:** tested on paper, using only the black cartridge.
 - **Color:** produces valid output in the offline tests, but has not been printed on paper yet.
 - **Paper and quality:** A4 and Letter, plus the draft, normal, best and photo modes from HPLIP.
@@ -112,34 +112,36 @@ HP and Deskjet are trademarks of HP Inc. This project is not affiliated with or 
 
 ## Author
 
-Developed by **Jonathas Motta** ([@jonathaxs](https://github.com/jonathaxs)) together with Claude, from Anthropic.
+Developed by **Jonathas Motta** ([@jonathaxs](https://github.com/jonathaxs)) with help from Claude.
 
 ---
 
-## Português (Brasil)
+# HP Deskjet 2050 para macOS
 
 _Um driver nativo para Apple Silicon da HP Deskjet 2050 All-in-One (J510) no macOS atual._
+
+**[Read in English](#hp-deskjet-2050-for-macos)**
 
 A HP não dá mais suporte a essa impressora no Mac. O driver oficial antigo é só para Intel e não funciona nas versões recentes do macOS, nem com o Rosetta.
 
 Este projeto pega o filtro `hpcups` do [HPLIP](https://developers.hp.com/hp-linux-imaging-and-printing), o driver open source da própria HP para Linux, compila nativo para Apple Silicon e instala como um driver CUPS comum. Depois de instalado, a impressora aparece na janela de impressão normal (Cmd+P) de qualquer app, incluindo o Chrome e o Pré-Visualização.
 
-### Situação
+## Situação
 
-- **Impressão pela USB:** funcionando, testada num MacBook Pro M3 Pro com macOS 27.
+- **Impressão pela USB:** funcionando, testada no macOS 27.
 - **Preto e branco:** testado no papel, usando só o cartucho preto.
 - **Colorido:** gera uma saída válida nos testes sem impressora, mas ainda não foi impresso no papel.
 - **Papel e qualidade:** A4 e Carta, além dos modos rascunho, normal, melhor e foto do HPLIP.
 - **Scanner:** ainda não é suportado.
 
-### Requisitos
+## Requisitos
 
 - Um Mac com Apple Silicon.
 - Ferramentas de linha de comando do Xcode: `xcode-select --install`
 - [Homebrew](https://brew.sh) com o jpeg-turbo: `brew install jpeg-turbo`
 - A impressora ligada na USB.
 
-### Instalação
+## Instalação
 
 ```bash
 git clone https://github.com/jonathaxs/deskjet-2050-macos.git
@@ -172,7 +174,7 @@ Para testar o filtro sem a impressora, depois do `make`:
 ./scripts/test-filter.sh
 ```
 
-### Desinstalação
+## Desinstalação
 
 ```bash
 cd deskjet-2050-macos/driver
@@ -181,7 +183,7 @@ sudo ./scripts/uninstall.sh
 
 Isso remove a fila, o filtro e o PPD.
 
-### Problemas comuns
+## Problemas comuns
 
 **Texto cinza ou preto sai fraco, ou nem sai.** Escolha Preto e branco (ou Tons de cinza) na janela de impressão. No modo colorido, só o preto puro usa o cartucho preto. Cinzas escuros e cores usam o cartucho colorido, e se ele estiver vazio, parte da página pode sumir.
 
@@ -191,7 +193,7 @@ Isso remove a fila, o filtro e o PPD.
 
 **Outro problema.** O log do CUPS fica em `/var/log/cups/error_log`. Abrir uma issue contando o que aconteceu, com o final desse log, ajuda bastante.
 
-### Como funciona
+## Como funciona
 
 ```mermaid
 flowchart LR
@@ -205,12 +207,12 @@ flowchart LR
 - O código do HPLIP não fica guardado neste repositório. Ele é baixado na hora do build e conferido contra um hash fixo.
 - O filtro é compilado no seu próprio Mac, então não existe um binário sem assinatura para o Gatekeeper bloquear.
 
-### Licença e créditos
+## Licença e créditos
 
 Baseado no [HPLIP](https://developers.hp.com/hp-linux-imaging-and-printing), da HP Development Company, L.P. A maior parte do código do `hpcups` está sob a licença BSD da HP, e uma parte dele (`ErnieFilter`, usada por esta impressora) é GPL-2.0-or-later. Por isso, este projeto é distribuído sob a **GPL-2.0-or-later**. Veja o [LICENSE](../LICENSE).
 
 HP e Deskjet são marcas da HP Inc. Este projeto não tem ligação com a HP nem é endossado por ela.
 
-### Autor
+## Autor
 
-Desenvolvido por **Jonathas Motta** ([@jonathaxs](https://github.com/jonathaxs)) junto com o Claude, da Anthropic.
+Desenvolvido por **Jonathas Motta** ([@jonathaxs](https://github.com/jonathaxs)) com assistência do Claude.
