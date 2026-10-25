@@ -7,6 +7,7 @@
 # Variáveis opcionais:
 #   QUEUE=nome        nome da fila (padrão: Deskjet_2050)
 #   PRINTER_URI=uri   endereço da impressora, se a detecção automática falhar (veja lpinfo -v)
+#   PAGE_SIZE=A4      papel padrão da fila, A4 ou Letter (padrão: pela região do macOS)
 #   DESTDIR=pasta     só para teste: instala dentro de outra pasta, sem sudo e sem criar a fila
 set -euo pipefail
 
@@ -39,6 +40,9 @@ install ${own[@]+"${own[@]}"} -m 755 "$FILTER_SRC" "$DESTDIR$FILTER_DST"
 
 # PPD do HPLIP com o filtro apontado pelo caminho completo (o macOS não procura filtros de terceiros
 # em outro lugar) e um nome que diferencia este driver na lista de impressoras.
+# A opção de cinza só com tinta preta se chama KGray no HPLIP, mas o Chrome e a caixa "Preto e branco"
+# do macOS pedem ColorModel=Gray. Sem uma opção com esse nome, o pedido é ignorado e a página sai em
+# cor, com os cinzas feitos pelo cartucho colorido. O hpcups escolhe o modo pelo cupsRowStep, não pelo nome.
 echo "Instalando o PPD em $PPD_DST"
 install -d -m 755 "$DESTDIR$(dirname "$PPD_DST")"
 tmp_ppd="$(mktemp "${TMPDIR:-/tmp}/deskjet2050-ppd.XXXXXX")"
@@ -46,6 +50,7 @@ trap 'rm -f "$tmp_ppd"' EXIT
 gzcat "$PPD_GZ" | sed \
     -e "s|^\*cupsFilter: .*|*cupsFilter: \"application/vnd.cups-raster 0 $FILTER_DST\"|" \
     -e "s|^\*NickName: .*|*NickName: \"HP Deskjet 2050 J510 series, hpcups $HPLIP_VERSION arm64\"|" \
+    -e "s|ColorModel KGray|ColorModel Gray|g" \
     > "$tmp_ppd"
 install ${own[@]+"${own[@]}"} -m 644 "$tmp_ppd" "$DESTDIR$PPD_DST"
 
@@ -61,8 +66,23 @@ if [ -z "$uri" ]; then
     exit 1
 fi
 
+# O PPD da HP vem com Carta como padrão; fora das Américas o papel comum é A4.
+# Com sudo, a região é lida do usuário que chamou o script, não do root.
+if [ -z "${PAGE_SIZE:-}" ]; then
+    if [ -n "${SUDO_USER:-}" ]; then
+        region="$(sudo -u "$SUDO_USER" defaults read -g AppleLocale 2>/dev/null || true)"
+    else
+        region="$(defaults read -g AppleLocale 2>/dev/null || true)"
+    fi
+    case "${region#*_}" in
+        US*|CA*|MX*|PH*|CL*|CO*|VE*|PR*) PAGE_SIZE=Letter ;;
+        *) PAGE_SIZE=A4 ;;
+    esac
+fi
+
 # printer-is-shared=false: a fila fica só neste Mac, sem compartilhar na rede.
-echo "Criando a fila $QUEUE para $uri"
-lpadmin -p "$QUEUE" -D "HP Deskjet 2050" -E -v "$uri" -P "$PPD_DST" -o printer-is-shared=false
+echo "Criando a fila $QUEUE para $uri (papel padrão: $PAGE_SIZE)"
+lpadmin -p "$QUEUE" -D "HP Deskjet 2050" -E -v "$uri" -P "$PPD_DST" \
+    -o printer-is-shared=false -o PageSize="$PAGE_SIZE"
 
 echo "Pronto. Para uma página de teste: lp -d $QUEUE arquivo.pdf"
