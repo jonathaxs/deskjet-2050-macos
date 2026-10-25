@@ -1,6 +1,107 @@
-# HP Deskjet 2050 for macOS
+# HP Deskjet 2050 para macOS
 
-**[Leia em português](#br-hp-deskjet-2050-para-macos)**
+**[Read in English](#en-hp-deskjet-2050-for-macos)**
+
+A HP não dá mais suporte a essa impressora no Mac. O driver oficial antigo é só para Intel e não funciona nas versões recentes do macOS, nem com o Rosetta.
+
+Este projeto pega o filtro `hpcups` do [HPLIP](https://developers.hp.com/hp-linux-imaging-and-printing), o driver open source da própria HP para Linux, compila nativo para Apple Silicon e instala como um driver CUPS comum. Depois de instalado, a impressora aparece na janela de impressão normal (Cmd+P) de qualquer app, incluindo o Chrome e o Pré-Visualização.
+
+## Situação
+
+- **Impressão pela USB:** funcionando, testada no macOS 27.
+- **Preto e branco:** testado no papel, usando só o cartucho preto.
+- **Colorido:** gera uma saída válida nos testes sem impressora, mas ainda não foi impresso no papel.
+- **Papel e qualidade:** A4 e Carta, além dos modos rascunho, normal, melhor e foto do HPLIP.
+- **Scanner:** ainda não é suportado.
+
+## Requisitos
+
+- Um Mac com Apple Silicon.
+- O [Homebrew](https://brew.sh). Para instalar, cole no Terminal o comando do site dele. Isso é feito uma vez só.
+- As ferramentas de linha de comando do Xcode. Se faltarem, o instalador abre a janela da Apple para instalar.
+- A impressora ligada na USB. Se o macOS perguntar se você permite a conexão do acessório, clique em **Permitir**. Se clicou em **Não Permitir**, tire o cabo e conecte de novo.
+
+## Instalação
+
+Baixe o zip **`deskjet-2050-driver`** da [versão mais recente](https://github.com/jonathaxs/deskjet-2050-macos/releases/latest) (não os arquivos "Source code") e abra. Depois abra a pasta `deskjet-2050-driver` e dê dois cliques no **`Install.command`**. Se você clonou o repositório, os mesmos arquivos estão na pasta `driver`.
+
+Uma janela do Terminal abre e faz tudo: confere os requisitos, instala o jpeg-turbo pelo Homebrew se precisar, baixa o HPLIP, compila o driver e instala. Quando pedir, digite a senha do seu Mac e aperte Enter. Nada aparece enquanto você digita, é normal. Quando aparecer "Installed", aperte Enter para fechar.
+
+### Se o macOS bloquear o Install.command
+
+Quando os arquivos vêm de um download pelo navegador, pelo AirDrop ou por mensagem, o macOS bloqueia o `Install.command` na primeira vez, porque ele não é assinado pela Apple. Clonando com o `git` isso não acontece. Para liberar uma vez:
+
+1. Dê dois cliques no `Install.command` e clique em **OK** no aviso.
+2. Abra **Ajustes do Sistema > Privacidade e Segurança**.
+3. Role até a mensagem sobre o `Install.command` e clique em **Abrir Mesmo Assim**.
+4. Confirme com a sua senha ou o Touch ID e clique em **Abrir**.
+
+### O que o instalador muda
+
+- Copia o filtro para `/Library/Printers/DeskJet2050/Filter/`.
+- Instala a descrição da impressora (PPD) em `/Library/Printers/PPDs/Contents/Resources/`.
+- Cria a fila `Deskjet_2050`, sem compartilhar na rede, com A4 ou Carta como papel padrão de acordo com a região do Mac.
+
+Nada mais no sistema é alterado, e o SIP continua ligado.
+
+### Pelo Terminal
+
+Os mesmos passos, na mão:
+
+```bash
+git clone https://github.com/jonathaxs/deskjet-2050-macos.git
+cd deskjet-2050-macos/driver/files
+brew install jpeg-turbo
+./scripts/fetch-hplip.sh
+make
+sudo ./scripts/install.sh
+```
+
+Para testar o filtro sem a impressora, depois do `make`, rode `./scripts/test-filter.sh`.
+
+## Desinstalação
+
+Dê dois cliques no **`Uninstall.command`** da pasta `driver`, ou rode `sudo ./scripts/uninstall.sh` de dentro de `driver/files`. Isso remove a fila, o filtro e o PPD.
+
+## Problemas comuns
+
+**Texto cinza ou preto sai fraco, ou nem sai.** Escolha Preto e branco (ou Tons de cinza) na janela de impressão. No modo colorido, só o preto puro usa o cartucho preto. Cinzas escuros e cores usam o cartucho colorido, e se ele estiver vazio, parte da página pode sumir.
+
+**A impressora não foi encontrada.** Confira o cabo, ligue a impressora e rode `lpinfo -v`. Deve aparecer um endereço começando com `usb://HP/Deskjet%202050`. Depois rode o instalador de novo. Se precisar, dá para passar o endereço na mão: `sudo PRINTER_URI="usb://..." ./scripts/install.sh`
+
+**Papel padrão errado.** Rode `sudo PAGE_SIZE=A4 ./scripts/install.sh` (ou `Letter` para Carta) de dentro de `driver/files`.
+
+**Outro problema.** O log do CUPS fica em `/var/log/cups/error_log`, e o log do build em `driver/files/build/make.log`. Abrir uma issue contando o que aconteceu, com o final desses logs, ajuda bastante.
+
+## Como funciona
+
+```mermaid
+flowchart LR
+    App["Qualquer app (Cmd+P)"] --> Raster["O macOS transforma a página em imagem (raster do CUPS)"]
+    Raster --> Filter["O hpcups do HPLIP transforma em PCL3GUI"]
+    Filter --> USB["O backend USB do macOS manda para a impressora"]
+```
+
+- Só o filtro `hpcups` é compilado, direto dos arquivos do HPLIP, sem o configure do HPLIP (que exige libusb, SANE e outras coisas que o filtro não usa).
+- A libjpeg é linkada estática, então o filtro depende só de bibliotecas do sistema.
+- O código do HPLIP não fica guardado neste repositório. Ele é baixado na hora do build e conferido contra um hash fixo.
+- O filtro é compilado no seu próprio Mac, então não existe um binário baixado para o Gatekeeper bloquear.
+
+## Licença e créditos
+
+Baseado no [HPLIP](https://developers.hp.com/hp-linux-imaging-and-printing), da HP Development Company, L.P. A maior parte do código do `hpcups` está sob a licença BSD da HP, e uma parte dele (`ErnieFilter`, usada por esta impressora) é GPL-2.0-or-later. Por isso, este projeto é distribuído sob a **GPL-2.0-or-later**. Veja o [LICENSE](../LICENSE).
+
+HP e Deskjet são marcas da HP Inc. Este projeto não tem ligação com a HP nem é endossado por ela.
+
+## Autor
+
+Desenvolvido por [@jonathaxs](https://github.com/jonathaxs) com assistência do Claude.
+
+---
+
+# (EN) HP Deskjet 2050 for macOS
+
+**[Leia em português](#hp-deskjet-2050-para-macos)**
 
 HP no longer supports this printer on the Mac. The old official driver is Intel only and does not work on recent versions of macOS, not even with Rosetta.
 
@@ -115,104 +216,3 @@ HP and Deskjet are trademarks of HP Inc. This project is not affiliated with or 
 ## Author
 
 Developed by [@jonathaxs](https://github.com/jonathaxs) with assistance from Claude.
-
----
-
-# (BR) HP Deskjet 2050 para macOS
-
-**[Read in English](#hp-deskjet-2050-for-macos)**
-
-A HP não dá mais suporte a essa impressora no Mac. O driver oficial antigo é só para Intel e não funciona nas versões recentes do macOS, nem com o Rosetta.
-
-Este projeto pega o filtro `hpcups` do [HPLIP](https://developers.hp.com/hp-linux-imaging-and-printing), o driver open source da própria HP para Linux, compila nativo para Apple Silicon e instala como um driver CUPS comum. Depois de instalado, a impressora aparece na janela de impressão normal (Cmd+P) de qualquer app, incluindo o Chrome e o Pré-Visualização.
-
-## Situação
-
-- **Impressão pela USB:** funcionando, testada no macOS 27.
-- **Preto e branco:** testado no papel, usando só o cartucho preto.
-- **Colorido:** gera uma saída válida nos testes sem impressora, mas ainda não foi impresso no papel.
-- **Papel e qualidade:** A4 e Carta, além dos modos rascunho, normal, melhor e foto do HPLIP.
-- **Scanner:** ainda não é suportado.
-
-## Requisitos
-
-- Um Mac com Apple Silicon.
-- O [Homebrew](https://brew.sh). Para instalar, cole no Terminal o comando do site dele. Isso é feito uma vez só.
-- As ferramentas de linha de comando do Xcode. Se faltarem, o instalador abre a janela da Apple para instalar.
-- A impressora ligada na USB. Se o macOS perguntar se você permite a conexão do acessório, clique em **Permitir**. Se clicou em **Não Permitir**, tire o cabo e conecte de novo.
-
-## Instalação
-
-Baixe o zip **`deskjet-2050-driver`** da [versão mais recente](https://github.com/jonathaxs/deskjet-2050-macos/releases/latest) (não os arquivos "Source code") e abra. Depois abra a pasta `deskjet-2050-driver` e dê dois cliques no **`Install.command`**. Se você clonou o repositório, os mesmos arquivos estão na pasta `driver`.
-
-Uma janela do Terminal abre e faz tudo: confere os requisitos, instala o jpeg-turbo pelo Homebrew se precisar, baixa o HPLIP, compila o driver e instala. Quando pedir, digite a senha do seu Mac e aperte Enter. Nada aparece enquanto você digita, é normal. Quando aparecer "Installed", aperte Enter para fechar.
-
-### Se o macOS bloquear o Install.command
-
-Quando os arquivos vêm de um download pelo navegador, pelo AirDrop ou por mensagem, o macOS bloqueia o `Install.command` na primeira vez, porque ele não é assinado pela Apple. Clonando com o `git` isso não acontece. Para liberar uma vez:
-
-1. Dê dois cliques no `Install.command` e clique em **OK** no aviso.
-2. Abra **Ajustes do Sistema > Privacidade e Segurança**.
-3. Role até a mensagem sobre o `Install.command` e clique em **Abrir Mesmo Assim**.
-4. Confirme com a sua senha ou o Touch ID e clique em **Abrir**.
-
-### O que o instalador muda
-
-- Copia o filtro para `/Library/Printers/DeskJet2050/Filter/`.
-- Instala a descrição da impressora (PPD) em `/Library/Printers/PPDs/Contents/Resources/`.
-- Cria a fila `Deskjet_2050`, sem compartilhar na rede, com A4 ou Carta como papel padrão de acordo com a região do Mac.
-
-Nada mais no sistema é alterado, e o SIP continua ligado.
-
-### Pelo Terminal
-
-Os mesmos passos, na mão:
-
-```bash
-git clone https://github.com/jonathaxs/deskjet-2050-macos.git
-cd deskjet-2050-macos/driver/files
-brew install jpeg-turbo
-./scripts/fetch-hplip.sh
-make
-sudo ./scripts/install.sh
-```
-
-Para testar o filtro sem a impressora, depois do `make`, rode `./scripts/test-filter.sh`.
-
-## Desinstalação
-
-Dê dois cliques no **`Uninstall.command`** da pasta `driver`, ou rode `sudo ./scripts/uninstall.sh` de dentro de `driver/files`. Isso remove a fila, o filtro e o PPD.
-
-## Problemas comuns
-
-**Texto cinza ou preto sai fraco, ou nem sai.** Escolha Preto e branco (ou Tons de cinza) na janela de impressão. No modo colorido, só o preto puro usa o cartucho preto. Cinzas escuros e cores usam o cartucho colorido, e se ele estiver vazio, parte da página pode sumir.
-
-**A impressora não foi encontrada.** Confira o cabo, ligue a impressora e rode `lpinfo -v`. Deve aparecer um endereço começando com `usb://HP/Deskjet%202050`. Depois rode o instalador de novo. Se precisar, dá para passar o endereço na mão: `sudo PRINTER_URI="usb://..." ./scripts/install.sh`
-
-**Papel padrão errado.** Rode `sudo PAGE_SIZE=A4 ./scripts/install.sh` (ou `Letter` para Carta) de dentro de `driver/files`.
-
-**Outro problema.** O log do CUPS fica em `/var/log/cups/error_log`, e o log do build em `driver/files/build/make.log`. Abrir uma issue contando o que aconteceu, com o final desses logs, ajuda bastante.
-
-## Como funciona
-
-```mermaid
-flowchart LR
-    App["Qualquer app (Cmd+P)"] --> Raster["O macOS transforma a página em imagem (raster do CUPS)"]
-    Raster --> Filter["O hpcups do HPLIP transforma em PCL3GUI"]
-    Filter --> USB["O backend USB do macOS manda para a impressora"]
-```
-
-- Só o filtro `hpcups` é compilado, direto dos arquivos do HPLIP, sem o configure do HPLIP (que exige libusb, SANE e outras coisas que o filtro não usa).
-- A libjpeg é linkada estática, então o filtro depende só de bibliotecas do sistema.
-- O código do HPLIP não fica guardado neste repositório. Ele é baixado na hora do build e conferido contra um hash fixo.
-- O filtro é compilado no seu próprio Mac, então não existe um binário baixado para o Gatekeeper bloquear.
-
-## Licença e créditos
-
-Baseado no [HPLIP](https://developers.hp.com/hp-linux-imaging-and-printing), da HP Development Company, L.P. A maior parte do código do `hpcups` está sob a licença BSD da HP, e uma parte dele (`ErnieFilter`, usada por esta impressora) é GPL-2.0-or-later. Por isso, este projeto é distribuído sob a **GPL-2.0-or-later**. Veja o [LICENSE](../LICENSE).
-
-HP e Deskjet são marcas da HP Inc. Este projeto não tem ligação com a HP nem é endossado por ela.
-
-## Autor
-
-Desenvolvido por [@jonathaxs](https://github.com/jonathaxs) com assistência do Claude.
