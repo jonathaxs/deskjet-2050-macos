@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
-# Remove a fila, o filtro e o PPD instalados pelo install.sh.
+# Removes the queue, the filter and the PPD installed by install.sh.
 #
-# Uso:
+# Usage:
 #   sudo ./scripts/uninstall.sh
-#   QUEUE=nome sudo ./scripts/uninstall.sh   # se a fila foi criada com outro nome
+#   QUEUE=name sudo ./scripts/uninstall.sh   # if the queue was created with another name
 set -euo pipefail
 
 INSTALL_DIR="/Library/Printers/DeskJet2050"
 PPD_DST="/Library/Printers/PPDs/Contents/Resources/deskjet2050-j510-hpcups.ppd"
 QUEUE="${QUEUE:-Deskjet_2050}"
 
-[ "$(id -u)" -eq 0 ] || { echo "Erro: rode com sudo." >&2; exit 1; }
+[ "$(id -u)" -eq 0 ] || { echo "Error: run with sudo." >&2; exit 1; }
 
 if lpstat -p "$QUEUE" >/dev/null 2>&1; then
-    echo "Removendo a fila $QUEUE"
+    echo "Removing queue $QUEUE"
     lpadmin -x "$QUEUE"
 fi
 
-echo "Removendo $INSTALL_DIR e $PPD_DST"
+echo "Removing $INSTALL_DIR and $PPD_DST"
 rm -rf "$INSTALL_DIR"
 rm -f "$PPD_DST"
-echo "Pronto."
+echo "Done."

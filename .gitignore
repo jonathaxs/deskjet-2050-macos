@@ -1,34 +1,34 @@
-# Arquivos invisiveis do Finder
+# Finder metadata
 .DS_Store
 
-# Saida de compilacao
+# Build output
 build/
 dist/
 *.o
 *.a
 *.dylib
 
-# Codigo do HPLIP baixado pelo script de build (nao versionar o tarball nem a extracao)
+# HPLIP source downloaded by the build script (never commit the tarball or the extracted tree)
 downloads/
 hplip-*/
 *.tar.gz
 
-# Instaladores gerados (publicar via GitHub Releases, nao no repo)
+# Generated installers (published through GitHub Releases, not in the repo)
 *.pkg
 *.dmg
 
-# Saidas de teste: jobs de impressao capturados, dumps de USB e logs
+# Test output: captured print jobs, USB dumps and logs
 captures/
 *.prn
 *.pcap
 *.pcapng
 *.log
 
-# Editores
+# Editors
 .vscode/
 .idea/
 
-# Assinatura e credenciais (nunca commitar)
+# Signing and credentials (never commit)
 *.p12
 *.cer
 *.p8
