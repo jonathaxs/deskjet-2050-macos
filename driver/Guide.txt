@@ -1,0 +1,85 @@
+HP DESKJET 2050 DRIVER FOR macOS
+https://github.com/jonathaxs/deskjet-2050-macos
+
+(Português mais abaixo.)
+
+
+BEFORE YOU START
+
+- A Mac with Apple Silicon.
+- Homebrew installed (https://brew.sh).
+- The printer plugged in over USB and turned on.
+
+If the Xcode Command Line Tools are missing, the installer opens Apple's window to install them.
+Just run the installer again when it finishes.
+
+
+INSTALL
+
+1. Double-click Install.command. A Terminal window opens and does everything.
+2. When it asks, type your Mac password and press Enter. Nothing shows up while you type.
+3. When you see "Installed", press Enter to close.
+
+The printer then shows up in the print dialog (Cmd+P) of any app.
+
+
+IF macOS BLOCKS THE FILE
+
+When this folder comes from a browser download, AirDrop or a message, macOS blocks Install.command
+the first time, because it is not signed by Apple. To allow it once:
+
+1. Double-click Install.command and click "Done" in the warning.
+2. Open System Settings > Privacy & Security.
+3. Scroll down to the message about Install.command and click "Open Anyway".
+4. Confirm with your password or Touch ID, then click "Open".
+
+Do the same for Uninstall.command if you ever need it.
+
+
+UNINSTALL
+
+Double-click Uninstall.command and type your Mac password. It removes the driver and the printer
+queue, and nothing else.
+
+
+----------------------------------------------------------------------------------------------------
+
+(BR) DRIVER DA HP DESKJET 2050 PARA macOS
+
+
+ANTES DE COMEÇAR
+
+- Um Mac com Apple Silicon.
+- O Homebrew instalado (https://brew.sh).
+- A impressora ligada na USB.
+
+Se faltarem as ferramentas de linha de comando do Xcode, o instalador abre a janela da Apple para
+instalar. É só rodar o instalador de novo quando terminar.
+
+
+INSTALAÇÃO
+
+1. Dê dois cliques no Install.command. Uma janela do Terminal abre e faz tudo.
+2. Quando pedir, digite a senha do seu Mac e aperte Enter. Nada aparece enquanto você digita.
+3. Quando aparecer "Installed", aperte Enter para fechar.
+
+Depois disso, a impressora aparece na janela de impressão (Cmd+P) de qualquer app.
+
+
+SE O macOS BLOQUEAR O ARQUIVO
+
+Quando esta pasta vem de um download pelo navegador, pelo AirDrop ou por mensagem, o macOS bloqueia
+o Install.command na primeira vez, porque ele não é assinado pela Apple. Para liberar uma vez:
+
+1. Dê dois cliques no Install.command e clique em "OK" no aviso.
+2. Abra Ajustes do Sistema > Privacidade e Segurança.
+3. Role até a mensagem sobre o Install.command e clique em "Abrir Mesmo Assim".
+4. Confirme com a sua senha ou o Touch ID e clique em "Abrir".
+
+Faça o mesmo com o Uninstall.command se um dia precisar.
+
+
+DESINSTALAÇÃO
+
+Dê dois cliques no Uninstall.command e digite a senha do seu Mac. Ele remove o driver e a fila da
+impressora, e nada mais.

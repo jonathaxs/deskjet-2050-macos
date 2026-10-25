@@ -60,7 +60,9 @@ if [ -n "$DESTDIR" ]; then
     exit 0
 fi
 
-uri="${PRINTER_URI:-$(lpinfo -v 2>/dev/null | awk '$2 ~ /^usb:\/\/HP\/Deskjet%202050/ { print $2; exit }')}"
+# awk reads to the end instead of exiting at the first match: exiting early could kill lpinfo with
+# SIGPIPE, and with pipefail and set -e that would stop this script without a message.
+uri="${PRINTER_URI:-$(lpinfo -v 2>/dev/null | awk '$2 ~ /^usb:\/\/HP\/Deskjet%202050/ && !uri { uri = $2 } END { if (uri) print uri }')}"
 if [ -z "$uri" ]; then
     echo "Driver installed, but the printer was not found on USB." >&2
     echo "Turn it on and run this script again, or add it in System Settings > Printers & Scanners." >&2
