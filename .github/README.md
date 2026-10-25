@@ -1,6 +1,6 @@
-# HP Deskjet 2050 para macOS
+# HP Deskjet 2050&nbsp;&nbsp;<img src="appicons/apple.svg" width="28" height="28" align="absmiddle" alt="Apple">
 
-**[Read in English](#en-hp-deskjet-2050-for-macos)**
+**[Read in English](#en-hp-deskjet-2050)**
 
 A HP não dá mais suporte a essa impressora no Mac. O driver oficial antigo é só para Intel e não funciona nas versões recentes do macOS, nem com o Rosetta.
 
@@ -99,9 +99,9 @@ Desenvolvido por [@jonathaxs](https://github.com/jonathaxs) com assistência do 
 
 ---
 
-# (EN) HP Deskjet 2050 for macOS
+# (EN) HP Deskjet 2050&nbsp;&nbsp;<img src="appicons/apple.svg" width="28" height="28" align="absmiddle" alt="Apple">
 
-**[Leia em português](#hp-deskjet-2050-para-macos)**
+**[Leia em português](#hp-deskjet-2050)**
 
 HP no longer supports this printer on the Mac. The old official driver is Intel only and does not work on recent versions of macOS, not even with Rosetta.
 
@@ -192,7 +192,7 @@ flowchart LR
 
 ```text
 deskjet-2050-macos/
-├── .github/                     This README
+├── .github/                     This README and its icon
 ├── LICENSE                      GPL-2.0
 └── driver/
     ├── files/
