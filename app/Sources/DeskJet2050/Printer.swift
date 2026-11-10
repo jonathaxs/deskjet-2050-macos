@@ -9,6 +9,18 @@ struct Cartridge: Identifiable, Sendable {
     let level: Int?     // percent, nil when the printer does not know
 
     var id: String { label }
+
+    /// Whether the printer says this is an HP cartridge, a refilled one, another brand, or none.
+    enum Origin { case genuine, refilled, notHP, missing, unknown }
+
+    var origin: Origin {
+        let s = state.lowercased()
+        if s == "missing" { return .missing }
+        if s.contains("refilled") { return .refilled }
+        if s.hasPrefix("non") || s.contains("counterfeit") { return .notHP }
+        if s.contains("genuinehp") { return .genuine }
+        return .unknown
+    }
 }
 
 /// What came back from the printer.
