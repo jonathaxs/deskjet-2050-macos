@@ -57,9 +57,11 @@ all: $(SRC_DIR)/.prepared
 	@$(MAKE) --no-print-directory $(BUILD_DIR)/hpcups $(BUILD_DIR)/deskjet2050
 
 # Reads the ink levels over USB and runs hpcups (see src/levels.c). Only system frameworks.
-$(BUILD_DIR)/deskjet2050: src/levels.c | $(BUILD_DIR)/obj
+# The USB reading is in src/ledm.c, which the app in app/ also uses.
+$(BUILD_DIR)/deskjet2050: src/levels.c src/ledm.c src/ledm.h | $(BUILD_DIR)/obj
 	$(CC) -arch $(ARCH) -isysroot $(SDK) -mmacosx-version-min=$(MIN_MACOS) -O2 -Wall \
-		-DHPCUPS_PATH=\"$(INSTALL_DIR)/Filter/hpcups\" -o $@ $< -framework IOKit -framework CoreFoundation
+		-DHPCUPS_PATH=\"$(INSTALL_DIR)/Filter/hpcups\" -o $@ src/levels.c src/ledm.c \
+		-framework IOKit -framework CoreFoundation
 	strip -x $@
 	codesign --force --sign - $@
 

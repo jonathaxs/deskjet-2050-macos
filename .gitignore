@@ -1,8 +1,10 @@
 # Finder metadata
 .DS_Store
 
-# Build output
+# Build output (SwiftPM too)
 build/
+.build/
+.swiftpm/
 dist/
 *.o
 *.a
