@@ -12,6 +12,7 @@ Este projeto pega o filtro `hpcups` do [HPLIP](https://developers.hp.com/hp-linu
 - **Preto e branco:** testado no papel, usando só o cartucho preto.
 - **Colorido:** gera uma saída válida nos testes sem impressora, mas ainda não foi impresso no papel.
 - **Papel e qualidade:** A4 e Carta, além dos modos rascunho, normal, melhor e foto do HPLIP.
+- **Nível de tinta:** aparece nos Ajustes do Mac, lido direto da impressora pela USB.
 - **Scanner:** ainda não é suportado.
 
 ## Requisitos
@@ -38,7 +39,7 @@ Quando os arquivos vêm de um download pelo navegador, pelo AirDrop ou por mensa
 
 ### O que o instalador muda
 
-- Copia o filtro para `/Library/Printers/DeskJet2050/Filter/`.
+- Copia o filtro e o leitor de nível de tinta para `/Library/Printers/DeskJet2050/Filter/`.
 - Instala a descrição da impressora (PPD) em `/Library/Printers/PPDs/Contents/Resources/`.
 - Cria a fila `Deskjet_2050`, sem compartilhar na rede, com A4 ou Carta como papel padrão de acordo com a região do Mac.
 
@@ -59,6 +60,16 @@ sudo ./scripts/install.sh
 
 Para testar o filtro sem a impressora, depois do `make`, rode `./scripts/test-filter.sh`.
 
+## Nível de tinta
+
+Abra **Ajustes do Sistema > Impressoras e Scanners**, escolha a HP Deskjet 2050 e clique em **Opções e Suprimentos**. O nível é atualizado a cada impressão. Para ver na hora, sem imprimir, rode no Terminal:
+
+```bash
+/Library/Printers/DeskJet2050/Filter/deskjet2050
+```
+
+O nível é a estimativa da própria impressora. Um cartucho seco pode continuar mostrando tinta.
+
 ## Desinstalação
 
 Dê dois cliques no **`Uninstall.command`** da pasta `driver`, ou rode `sudo ./scripts/uninstall.sh` de dentro de `driver/files`. Isso remove a fila, o filtro e o PPD.
@@ -78,7 +89,8 @@ Dê dois cliques no **`Uninstall.command`** da pasta `driver`, ou rode `sudo ./s
 ```mermaid
 flowchart LR
     App["Qualquer app (Cmd+P)"] --> Raster["O macOS transforma a página em imagem (raster do CUPS)"]
-    Raster --> Filter["O hpcups do HPLIP transforma em PCL3GUI"]
+    Raster --> Levels["O deskjet2050 lê o nível de tinta pela USB"]
+    Levels --> Filter["O hpcups do HPLIP transforma em PCL3GUI"]
     Filter --> USB["O backend USB do macOS manda para a impressora"]
 ```
 
@@ -86,6 +98,7 @@ flowchart LR
 - A libjpeg é linkada estática, então o filtro depende só de bibliotecas do sistema.
 - O código do HPLIP não fica guardado neste repositório. Ele é baixado na hora do build e conferido contra um hash fixo.
 - O filtro é compilado no seu próprio Mac, então não existe um binário baixado para o Gatekeeper bloquear.
+- O nível de tinta vem do mesmo pedido que o HPLIP faz no Linux: um HTTP GET de `/DevMgmt/ConsumableConfigDyn.xml` na interface USB de status da impressora. O `deskjet2050` faz isso com o IOKit e repassa os níveis ao CUPS.
 
 ## Licença e créditos
 
@@ -113,6 +126,7 @@ This project takes the `hpcups` filter from [HPLIP](https://developers.hp.com/hp
 - **Black and white:** tested on paper, using only the black cartridge.
 - **Color:** produces valid output in the offline tests, but has not been printed on paper yet.
 - **Paper and quality:** A4 and Letter, plus the draft, normal, best and photo modes from HPLIP.
+- **Ink levels:** shown in System Settings, read straight from the printer over USB.
 - **Scanner:** not supported yet.
 
 ## Requirements
@@ -139,7 +153,7 @@ When the files come from a browser download, AirDrop or a message, macOS blocks 
 
 ### What the installer changes
 
-- Copies the filter to `/Library/Printers/DeskJet2050/Filter/`.
+- Copies the filter and the ink level reader to `/Library/Printers/DeskJet2050/Filter/`.
 - Installs the printer description (PPD) in `/Library/Printers/PPDs/Contents/Resources/`.
 - Creates the `Deskjet_2050` queue, not shared on the network, with A4 or Letter as the default paper based on your Mac's region.
 
@@ -160,6 +174,16 @@ sudo ./scripts/install.sh
 
 To test the filter without a printer, after `make`, run `./scripts/test-filter.sh`.
 
+## Ink levels
+
+Open **System Settings > Printers & Scanners**, pick the HP Deskjet 2050 and click **Options & Supplies**. The levels are updated on every print. To see them right away, without printing, run in Terminal:
+
+```bash
+/Library/Printers/DeskJet2050/Filter/deskjet2050
+```
+
+The level is the printer's own estimate. A dried-out cartridge can still show ink left.
+
 ## Uninstall
 
 Double-click **`Uninstall.command`** in the `driver` folder, or run `sudo ./scripts/uninstall.sh` from `driver/files`. This removes the queue, the filter and the PPD.
@@ -179,7 +203,8 @@ Double-click **`Uninstall.command`** in the `driver` folder, or run `sudo ./scri
 ```mermaid
 flowchart LR
     App["Any app (Cmd+P)"] --> Raster["macOS turns the page into an image (CUPS raster)"]
-    Raster --> Filter["hpcups from HPLIP turns it into PCL3GUI"]
+    Raster --> Levels["deskjet2050 reads the ink levels over USB"]
+    Levels --> Filter["hpcups from HPLIP turns it into PCL3GUI"]
     Filter --> USB["macOS USB backend sends it to the printer"]
 ```
 
@@ -187,6 +212,7 @@ flowchart LR
 - libjpeg is linked statically, so the filter only depends on system libraries.
 - The HPLIP source is not stored in this repository. It is downloaded at build time and checked against a fixed hash.
 - The filter is built on your own Mac, so there is no downloaded binary for Gatekeeper to block.
+- The ink levels come from the same request HPLIP makes on Linux: an HTTP GET of `/DevMgmt/ConsumableConfigDyn.xml` on the printer's USB status interface. `deskjet2050` does it with IOKit and hands the levels to CUPS.
 
 ## Repository structure
 
@@ -197,6 +223,7 @@ deskjet-2050-macos/
 └── driver/
     ├── files/
     │   ├── Makefile             Builds hpcups for arm64
+    │   ├── src/levels.c         Reads the ink levels and runs hpcups
     │   └── scripts/
     │       ├── fetch-hplip.sh   Downloads and verifies the HPLIP source
     │       ├── test-filter.sh   Tests the filter without a printer

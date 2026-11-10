@@ -54,7 +54,14 @@ OBJS := $(addprefix $(BUILD_DIR)/obj/,$(addsuffix .o,$(CPP_SOURCES) $(C_SOURCES)
 
 # Prepare the sources first; only then can make find the .cpp files in build/src.
 all: $(SRC_DIR)/.prepared
-	@$(MAKE) --no-print-directory $(BUILD_DIR)/hpcups
+	@$(MAKE) --no-print-directory $(BUILD_DIR)/hpcups $(BUILD_DIR)/deskjet2050
+
+# Reads the ink levels over USB and runs hpcups (see src/levels.c). Only system frameworks.
+$(BUILD_DIR)/deskjet2050: src/levels.c | $(BUILD_DIR)/obj
+	$(CC) -arch $(ARCH) -isysroot $(SDK) -mmacosx-version-min=$(MIN_MACOS) -O2 -Wall \
+		-DHPCUPS_PATH=\"$(INSTALL_DIR)/Filter/hpcups\" -o $@ $< -framework IOKit -framework CoreFoundation
+	strip -x $@
+	codesign --force --sign - $@
 
 $(BUILD_DIR)/hpcups: $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS)

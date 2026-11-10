@@ -47,6 +47,12 @@ the first time, because it is not signed by Apple. To allow it once:
 Do the same for Uninstall.command if you ever need it.
 
 
+INK LEVELS
+
+System Settings > Printers & Scanners > HP Deskjet 2050 > Options & Supplies. They are updated
+on every print.
+
+
 UNINSTALL
 
 Double-click Uninstall.command and type your Mac password. It removes the driver and the printer
@@ -99,6 +105,12 @@ o Install.command na primeira vez, porque ele não é assinado pela Apple. Para 
 4. Confirme com a sua senha ou o Touch ID e clique em "Abrir".
 
 Faça o mesmo com o Uninstall.command se um dia precisar.
+
+
+NÍVEL DE TINTA
+
+Ajustes do Sistema > Impressoras e Scanners > HP Deskjet 2050 > Opções e Suprimentos. O nível é
+atualizado a cada impressão.
 
 
 DESINSTALAÇÃO
