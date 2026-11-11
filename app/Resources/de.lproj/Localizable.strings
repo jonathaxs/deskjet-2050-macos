@@ -1,0 +1,32 @@
+/* German. Keys are the English texts in the Swift code. */
+
+"Reading the printer…" = "Drucker wird gelesen …";
+"Connected over USB" = "Über USB verbunden";
+"Printer not found" = "Drucker nicht gefunden";
+"The printer is busy" = "Der Drucker ist beschäftigt";
+"The printer did not answer" = "Der Drucker hat nicht geantwortet";
+"Turn the printer on and plug it into the Mac with the USB cable." = "Schalte den Drucker ein und verbinde ihn mit dem USB-Kabel mit dem Mac.";
+"It is probably printing. Try again in a moment." = "Er druckt wahrscheinlich gerade. Versuche es gleich noch einmal.";
+"Turn it off and on again, then refresh." = "Schalte ihn aus und wieder ein und aktualisiere dann.";
+"No cartridges reported" = "Der Drucker hat keine Patronen gemeldet";
+"Ink" = "Tinte";
+"Black" = "Schwarz";
+"Tri-color" = "Dreifarbig";
+"Cyan" = "Cyan";
+"Magenta" = "Magenta";
+"Yellow" = "Gelb";
+"Genuine HP" = "Original HP";
+"Refilled HP" = "Nachgefüllte HP";
+"Not HP" = "Nicht HP";
+"OK" = "OK";
+"Low ink" = "Wenig Tinte";
+"Empty" = "Leer";
+"Cartridge missing" = "Patrone fehlt";
+"Unknown level" = "Füllstand unbekannt";
+"Estimates from the printer. It warns when a cartridge reaches %lld%%." = "Schätzung des Druckers. Er warnt, wenn eine Patrone %lld %% erreicht.";
+"Updated at %@" = "Aktualisiert um %@";
+"Refresh" = "Aktualisieren";
+"Show in the menu bar" = "In der Menüleiste anzeigen";
+"Shows the ink levels next to the clock." = "Zeigt den Tintenstand neben der Uhr.";
+"Open DeskJet 2050" = "DeskJet 2050 öffnen";
+"Quit" = "Beenden";

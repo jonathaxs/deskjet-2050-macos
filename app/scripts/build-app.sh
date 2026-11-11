@@ -21,7 +21,7 @@ APP="$BUILD_DIR/$APP_NAME.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/$EXECUTABLE"
-# Translations (en, pt-BR). Kept out of SwiftPM resources so they sit in Contents/Resources, where
+# Translations (en, pt-BR, es, fr, it, de). Kept out of SwiftPM resources so they sit in Contents/Resources, where
 # SwiftUI looks by default and where the code signature covers them.
 cp -R "$APP_DIR/Resources/"*.lproj "$APP/Contents/Resources/"
 
@@ -36,6 +36,10 @@ cat > "$APP/Contents/Info.plist" <<EOF
     <array>
         <string>en</string>
         <string>pt-BR</string>
+        <string>es</string>
+        <string>fr</string>
+        <string>it</string>
+        <string>de</string>
     </array>
     <key>CFBundleExecutable</key>
     <string>$EXECUTABLE</string>

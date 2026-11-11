@@ -5,28 +5,28 @@
 "Printer not found" = "Impressora não encontrada";
 "The printer is busy" = "A impressora está ocupada";
 "The printer did not answer" = "A impressora não respondeu";
-
 "Turn the printer on and plug it into the Mac with the USB cable." = "Ligue a impressora e conecte-a ao Mac pelo cabo USB.";
 "It is probably printing. Try again in a moment." = "Ela provavelmente está imprimindo. Tente de novo daqui a pouco.";
 "Turn it off and on again, then refresh." = "Desligue e ligue a impressora, depois atualize.";
 "No cartridges reported" = "A impressora não informou nenhum cartucho";
-
+"Ink" = "Tinta";
 "Black" = "Preto";
 "Tri-color" = "Colorido";
 "Cyan" = "Ciano";
 "Magenta" = "Magenta";
 "Yellow" = "Amarelo";
-
 "Genuine HP" = "HP original";
 "Refilled HP" = "HP recarregado";
 "Not HP" = "Não é HP";
-
 "OK" = "OK";
 "Low ink" = "Pouca tinta";
 "Empty" = "Vazio";
 "Cartridge missing" = "Sem cartucho";
 "Unknown level" = "Nível desconhecido";
-
 "Estimates from the printer. It warns when a cartridge reaches %lld%%." = "Estimativa da própria impressora. Ela avisa quando um cartucho chega a %lld%%.";
 "Updated at %@" = "Atualizado às %@";
 "Refresh" = "Atualizar";
+"Show in the menu bar" = "Mostrar na barra de menus";
+"Shows the ink levels next to the clock." = "Mostra o nível de tinta ao lado do relógio.";
+"Open DeskJet 2050" = "Abrir o DeskJet 2050";
+"Quit" = "Sair";

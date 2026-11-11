@@ -1,0 +1,32 @@
+/* French. Keys are the English texts in the Swift code. */
+
+"Reading the printer…" = "Lecture de l’imprimante…";
+"Connected over USB" = "Connectée en USB";
+"Printer not found" = "Imprimante introuvable";
+"The printer is busy" = "L’imprimante est occupée";
+"The printer did not answer" = "L’imprimante n’a pas répondu";
+"Turn the printer on and plug it into the Mac with the USB cable." = "Allumez l’imprimante et branchez-la au Mac avec le câble USB.";
+"It is probably printing. Try again in a moment." = "Elle est probablement en train d’imprimer. Réessayez dans un instant.";
+"Turn it off and on again, then refresh." = "Éteignez-la puis rallumez-la, puis actualisez.";
+"No cartridges reported" = "L’imprimante n’a signalé aucune cartouche";
+"Ink" = "Encre";
+"Black" = "Noir";
+"Tri-color" = "Trois couleurs";
+"Cyan" = "Cyan";
+"Magenta" = "Magenta";
+"Yellow" = "Jaune";
+"Genuine HP" = "HP d’origine";
+"Refilled HP" = "HP rechargée";
+"Not HP" = "Pas HP";
+"OK" = "OK";
+"Low ink" = "Encre faible";
+"Empty" = "Vide";
+"Cartridge missing" = "Cartouche absente";
+"Unknown level" = "Niveau inconnu";
+"Estimates from the printer. It warns when a cartridge reaches %lld%%." = "Estimation de l’imprimante. Elle prévient quand une cartouche atteint %lld %%.";
+"Updated at %@" = "Mis à jour à %@";
+"Refresh" = "Actualiser";
+"Show in the menu bar" = "Afficher dans la barre des menus";
+"Shows the ink levels next to the clock." = "Affiche le niveau d’encre à côté de l’horloge.";
+"Open DeskJet 2050" = "Ouvrir DeskJet 2050";
+"Quit" = "Quitter";
