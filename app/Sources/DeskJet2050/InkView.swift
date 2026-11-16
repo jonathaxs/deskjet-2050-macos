@@ -3,7 +3,7 @@ import SwiftUI
 /// Main window, laid out like System Settings: the printer, its cartridges, and the app options.
 struct InkView: View {
     @Bindable var model: InkModel
-    @AppStorage(Settings.showInMenuBar) private var showInMenuBar = false
+    let driver: DriverModel
 
     var body: some View {
         Form {
@@ -33,11 +33,9 @@ struct InkView: View {
                 }
             }
 
-            Section {
-                Toggle(isOn: $showInMenuBar) {
-                    Text("Show in the menu bar")
-                    Text("Shows the ink levels next to the clock.")
-                }
+            // Reinstall and Uninstall live in Settings; the main window only offers Install when it is needed.
+            if driver.status == .notInstalled || driver.status == .noQueue {
+                DriverSection(driver: driver)
             }
         }
         .formStyle(.grouped)
@@ -46,7 +44,11 @@ struct InkView: View {
         .navigationTitle("DeskJet 2050")
         .navigationSubtitle(subtitle)
         .toolbar {
-            ToolbarItem {
+            ToolbarItemGroup {
+                SettingsLink {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .help(Text("Settings"))
                 Button {
                     Task { await model.refresh() }
                 } label: {
@@ -64,6 +66,115 @@ struct InkView: View {
             Text("Updated at \(date, style: .time)")
         } else {
             Text(verbatim: "")
+        }
+    }
+}
+
+/// Settings window (gear button or ⌘,): the driver and the menu bar option.
+struct SettingsView: View {
+    let driver: DriverModel
+    @AppStorage(AppSettings.showInMenuBar) private var showInMenuBar = false
+
+    var body: some View {
+        Form {
+            DriverSection(driver: driver)
+            Section {
+                Toggle(isOn: $showInMenuBar) {
+                    Text("Show in the menu bar")
+                    Text("Shows the ink levels next to the clock.")
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .frame(width: 460)
+        .fixedSize(horizontal: false, vertical: true)
+        .task { await driver.check() }
+    }
+}
+
+/// Driver state with Install, Reinstall and Uninstall. The work happens in Terminal.
+struct DriverSection: View {
+    let driver: DriverModel
+    @State private var confirmUninstall = false
+
+    var body: some View {
+        Section {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Printer driver")
+                    HStack(spacing: 6) {
+                        Circle().fill(color).frame(width: 7, height: 7)
+                        Text(statusText).foregroundStyle(.secondary)
+                    }
+                    .font(.subheadline)
+                }
+                Spacer()
+                buttons
+            }
+            .padding(.vertical, 2)
+            if driver.waitingForTerminal {
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text("Waiting for Terminal…").foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Stop waiting") { driver.stopWaiting() }
+                        .buttonStyle(.link)
+                }
+                .font(.subheadline)
+            }
+            if let error = driver.error {
+                Label(error, systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(.red)
+                    .font(.subheadline)
+            }
+        } header: {
+            Text("Driver")
+        } footer: {
+            Text("Terminal opens to finish. Type your Mac password there: this app never sees it.")
+                .foregroundStyle(.secondary)
+                .font(.footnote)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .confirmationDialog("Uninstall the driver?", isPresented: $confirmUninstall) {
+            Button("Uninstall", role: .destructive) { driver.uninstall() }
+        } message: {
+            Text("This removes the driver and the printer queue. You can install it again later.")
+        }
+    }
+
+    @ViewBuilder
+    private var buttons: some View {
+        switch driver.status {
+        case .checking:
+            ProgressView().controlSize(.small)
+        case .notInstalled, .noQueue:
+            Button("Install…") { driver.install() }
+                .buttonStyle(.borderedProminent)
+                .disabled(driver.waitingForTerminal)
+        case .installed:
+            HStack {
+                Button("Reinstall…") { driver.install() }
+                Button("Uninstall…") { confirmUninstall = true }
+            }
+            .disabled(driver.waitingForTerminal)
+        }
+    }
+
+    private var statusText: LocalizedStringKey {
+        switch driver.status {
+        case .checking: "Checking…"
+        case .installed: "Installed"
+        case .noQueue: "Installed, but the printer queue is missing"
+        case .notInstalled: "Not installed"
+        }
+    }
+
+    private var color: Color {
+        switch driver.status {
+        case .checking: .gray
+        case .installed: .green
+        case .noQueue: .orange
+        case .notInstalled: .red
         }
     }
 }

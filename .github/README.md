@@ -1,4 +1,4 @@
-# HP Deskjet 2050&nbsp;&nbsp;<img src="appicons/apple.svg" width="28" height="28" align="absmiddle" alt="Apple">
+# <img src="appicons/deskjet2050-rounded.png" width="56" align="absmiddle" alt="Ícone do app DeskJet 2050">&nbsp;&nbsp;HP Deskjet 2050&nbsp;&nbsp;<img src="appicons/apple.svg" width="28" height="28" align="absmiddle" alt="Apple">
 
 **[Read in English](#en-hp-deskjet-2050)**
 
@@ -112,7 +112,7 @@ Desenvolvido por [@jonathaxs](https://github.com/jonathaxs) com assistência do 
 
 ---
 
-# (EN) HP Deskjet 2050&nbsp;&nbsp;<img src="appicons/apple.svg" width="28" height="28" align="absmiddle" alt="Apple">
+# <img src="appicons/deskjet2050-rounded.png" width="56" align="absmiddle" alt="DeskJet 2050 app icon">&nbsp;&nbsp;(EN) HP Deskjet 2050&nbsp;&nbsp;<img src="appicons/apple.svg" width="28" height="28" align="absmiddle" alt="Apple">
 
 **[Leia em português](#hp-deskjet-2050)**
 

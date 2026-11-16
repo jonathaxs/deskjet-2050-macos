@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-enum Settings {
+enum AppSettings {
     /// UserDefaults key: show the optional icon in the menu bar (off by default).
     static let showInMenuBar = "showInMenuBar"
 }

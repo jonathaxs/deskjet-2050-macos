@@ -30,3 +30,20 @@
 "Shows the ink levels next to the clock." = "Mostra o nível de tinta ao lado do relógio.";
 "Open DeskJet 2050" = "Abrir o DeskJet 2050";
 "Quit" = "Sair";
+
+"Driver" = "Driver";
+"Printer driver" = "Driver da impressora";
+"Checking…" = "Verificando…";
+"Installed" = "Instalado";
+"Installed, but the printer queue is missing" = "Instalado, mas falta a fila da impressora";
+"Not installed" = "Não instalado";
+"Install…" = "Instalar…";
+"Reinstall…" = "Reinstalar…";
+"Uninstall…" = "Desinstalar…";
+"Waiting for Terminal…" = "Aguardando o Terminal…";
+"Stop waiting" = "Parar de aguardar";
+"Terminal opens to finish. Type your Mac password there: this app never sees it." = "O Terminal abre para terminar. Digite a senha do Mac lá: este app nunca a vê.";
+"Uninstall the driver?" = "Desinstalar o driver?";
+"Uninstall" = "Desinstalar";
+"This removes the driver and the printer queue. You can install it again later." = "Isso remove o driver e a fila da impressora. Você pode instalar de novo depois.";
+"Settings" = "Ajustes";
