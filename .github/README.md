@@ -31,7 +31,7 @@ Este projeto pega o filtro `hpcups` do [HPLIP](https://developers.hp.com/hp-linu
 
 Uma janela do Terminal abre e faz tudo: confere os requisitos, instala o jpeg-turbo pelo Homebrew se precisar, baixa o HPLIP, compila o driver e instala. Quando pedir, digite a senha do seu Mac e aperte Enter. Nada aparece enquanto você digita, é normal. Quando aparecer "Installed", aperte Enter para fechar. A senha é digitada só no Terminal: o app nunca a vê.
 
-Reinstalar, desinstalar e mostrar o nível de tinta na barra de menus ficam nos ajustes do app (a engrenagem no alto da janela, ou Cmd+vírgula).
+No alto da janela do app, o botão **Driver** reinstala ou desinstala o driver, e o botão **Ajustes** (ou Cmd+vírgula) escolhe a aparência clara, escura ou igual à do Mac e liga o ícone na barra de menus.
 
 ### Se o macOS bloquear o app
 
@@ -87,7 +87,7 @@ O nível é a estimativa da própria impressora. Um cartucho seco pode continuar
 
 ## Desinstalação
 
-No app, abra os ajustes (a engrenagem) e clique em **Desinstalar…**. Sem o app, dê dois cliques no **`Uninstall.command`** da pasta `driver`, ou rode `sudo ./scripts/uninstall.sh` de dentro de `driver/files`. Isso remove a fila, o filtro e o PPD.
+No app, clique em **Driver** e depois em **Desinstalar…**. Sem o app, dê dois cliques no **`Uninstall.command`** da pasta `driver`, ou rode `sudo ./scripts/uninstall.sh` de dentro de `driver/files`. Isso remove a fila, o filtro e o PPD.
 
 ## Problemas comuns
 
@@ -124,7 +124,7 @@ HP e Deskjet são marcas da HP Inc. Este projeto não tem ligação com a HP nem
 
 ## Autor
 
-Desenvolvido por [@jonathaxs](https://github.com/jonathaxs) com assistência do Claude.
+Desenvolvido por **Jonathas Motta** ([@jonathaxs](https://github.com/jonathaxs)), com assistência do Claude.
 
 ---
 
@@ -161,7 +161,7 @@ This project takes the `hpcups` filter from [HPLIP](https://developers.hp.com/hp
 
 A Terminal window opens and does everything: it checks the requirements, installs jpeg-turbo with Homebrew if needed, downloads HPLIP, builds the driver and installs it. When it asks, type your Mac password and press Enter. Nothing shows up while you type, that is normal. When you see "Installed", press Enter to close. The password is typed only in Terminal: the app never sees it.
 
-Reinstall, uninstall and showing the ink levels in the menu bar are in the app's settings (the gear at the top of the window, or Cmd+comma).
+At the top of the app window, the **Driver** button reinstalls or uninstalls the driver, and the **Settings** button (or Cmd+comma) picks a light, dark or Mac-matching appearance and turns on the menu bar icon.
 
 ### If macOS blocks the app
 
@@ -217,7 +217,7 @@ The level is the printer's own estimate. A dried-out cartridge can still show in
 
 ## Uninstall
 
-In the app, open the settings (the gear) and click **Uninstall…**. Without the app, double-click **`Uninstall.command`** in the `driver` folder, or run `sudo ./scripts/uninstall.sh` from `driver/files`. This removes the queue, the filter and the PPD.
+In the app, click **Driver**, then **Uninstall…**. Without the app, double-click **`Uninstall.command`** in the `driver` folder, or run `sudo ./scripts/uninstall.sh` from `driver/files`. This removes the queue, the filter and the PPD.
 
 ## Troubleshooting
 
@@ -282,4 +282,4 @@ HP and Deskjet are trademarks of HP Inc. This project is not affiliated with or 
 
 ## Author
 
-Developed by [@jonathaxs](https://github.com/jonathaxs) with assistance from Claude.
+Developed by **Jonathas Motta** ([@jonathaxs](https://github.com/jonathaxs)), with assistance from Claude.

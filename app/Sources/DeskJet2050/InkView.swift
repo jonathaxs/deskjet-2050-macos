@@ -33,7 +33,7 @@ struct InkView: View {
     }
 }
 
-/// First page: Driver, Settings and Refresh above the printer, the ink, and help when something is missing.
+/// First page: Driver and Settings on top, the printer with Refresh in it, the ink, and help when something is missing.
 struct MainPage: View {
     let model: InkModel
     let driver: DriverModel
@@ -50,36 +50,7 @@ struct MainPage: View {
                         .foregroundStyle(.secondary)
                 }
             } header: {
-                VStack(spacing: 8) {
-                    HStack(spacing: 10) {
-                        Button { showDriver = true } label: {
-                            Label("Driver", systemImage: "shippingbox")
-                        }
-                        Button { showSettings = true } label: {
-                            Label("Settings", systemImage: "gearshape")
-                        }
-                        Button { Task { await model.refresh() } } label: {
-                            Label("Refresh", systemImage: "arrow.clockwise")
-                        }
-                        .keyboardShortcut("r")
-                        .disabled(model.isReading)
-                    }
-                    .glassButtons()
-                    // Anchored to the whole row, so both popovers open centered in the window.
-                    .popover(isPresented: $showDriver, attachmentAnchor: .rect(.bounds), arrowEdge: .bottom) {
-                        DriverPopover(driver: driver, requestUninstall: requestUninstall)
-                    }
-                    .popover(isPresented: $showSettings, attachmentAnchor: .rect(.bounds), arrowEdge: .bottom) {
-                        SettingsView()
-                    }
-                    updated
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .labelStyle(.titleAndIcon)
-                .textCase(nil)
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 6)
+                topBar
             }
 
             // Always on screen, so the window keeps its size. Without a reading the bars are just grey.
@@ -117,24 +88,96 @@ struct MainPage: View {
         .hiddenToolbarLine()
     }
 
-    /// "Updated at 14:06" under the buttons. A blank line before the first reading keeps the height.
-    private var updated: Text {
-        if let date = model.lastUpdate {
-            Text("Updated at \(date, style: .time)")
-        } else {
-            Text(verbatim: " ")
+    /// Driver and Settings above the printer. Their popovers open down, centered in the window.
+    private var topBar: some View {
+        HStack(spacing: 10) {
+            Button { showDriver = true } label: {
+                Label("Driver", systemImage: "shippingbox")
+            }
+            Button { showSettings = true } label: {
+                Label("Settings", systemImage: "gearshape")
+            }
         }
+        .labelStyle(.titleAndIcon)
+        .glassButtons()
+        // Anchored to the whole row, which sits in the middle of the window.
+        .popover(isPresented: $showDriver, attachmentAnchor: .rect(.bounds), arrowEdge: .bottom) {
+            DriverPopover(driver: driver, requestUninstall: requestUninstall)
+        }
+        .popover(isPresented: $showSettings, attachmentAnchor: .rect(.bounds), arrowEdge: .bottom) {
+            SettingsView()
+        }
+        .textCase(nil)
+        .frame(maxWidth: .infinity)
+        .padding(.bottom, 6)
+    }
+
+}
+
+/// Refresh: while reading, the title fades and the arrow slides to the middle and spins, then goes back.
+struct RefreshButton: View {
+    let model: InkModel
+    /// Keeps the spin going for at least one turn, even when the printer answers right away.
+    @State private var spinning = false
+    @Namespace private var arrow
+
+    private var active: Bool { spinning || model.isReading }
+
+    var body: some View {
+        Button {
+            Task {
+                spinning = true
+                let start = Date.now
+                await model.refresh()
+                let left = 1.0 - Date.now.timeIntervalSince(start)
+                if left > 0 { try? await Task.sleep(for: .seconds(left)) }
+                spinning = false
+            }
+        } label: {
+            HStack(spacing: 6) {
+                if active {
+                    Color.clear.frame(width: 1, height: 1)
+                } else {
+                    icon.matchedGeometryEffect(id: "arrow", in: arrow)
+                }
+                Text("Refresh").opacity(active ? 0 : 1)
+            }
+            .overlay {
+                if active {
+                    icon.matchedGeometryEffect(id: "arrow", in: arrow)
+                        .modifier(Spin())
+                }
+            }
+            .animation(.spring(duration: 0.35), value: active)
+        }
+        .keyboardShortcut("r")
+        .disabled(active)
+        .accessibilityLabel(Text("Refresh"))
+    }
+
+    private var icon: some View { Image(systemName: "arrow.clockwise") }
+}
+
+/// Turns its content around forever while it is on screen.
+private struct Spin: ViewModifier {
+    @State private var angle = 0.0
+    func body(content: Content) -> some View {
+        content
+            .rotationEffect(.degrees(angle))
+            .onAppear {
+                withAnimation(.linear(duration: 0.8).repeatForever(autoreverses: false).delay(0.2)) { angle = 360 }
+            }
     }
 }
 
 extension View {
     /// Liquid Glass buttons on macOS 26 and later, regular bordered buttons before that.
     @ViewBuilder
-    func glassButtons() -> some View {
+    func glassButtons(prominent: Bool = false) -> some View {
         if #available(macOS 26, *) {
-            buttonStyle(.glass)
+            if prominent { buttonStyle(.glassProminent) } else { buttonStyle(.glass) }
         } else {
-            buttonStyle(.bordered)
+            if prominent { buttonStyle(.borderedProminent) } else { buttonStyle(.bordered) }
         }
     }
 
@@ -262,13 +305,18 @@ struct DriverSection: View {
             ProgressView().controlSize(.small)
         case .notInstalled, .noQueue:
             Button("Install…") { driver.install() }
-                .buttonStyle(.borderedProminent)
+                .glassButtons(prominent: true)
                 .disabled(driver.waitingForTerminal)
         case .installed:
-            HStack {
-                Button("Reinstall…") { driver.install() }
-                Button("Uninstall…") { requestUninstall() }
+            // One above the other, same width, so long names in other languages still fit.
+            VStack(spacing: 8) {
+                Button { driver.install() } label: { Text("Reinstall…").frame(maxWidth: .infinity) }
+                Button(role: .destructive) { requestUninstall() } label: {
+                    Text("Uninstall…").frame(maxWidth: .infinity)
+                }
             }
+            .glassButtons()
+            .fixedSize(horizontal: true, vertical: false)
             .disabled(driver.waitingForTerminal)
         }
     }
@@ -354,7 +402,7 @@ struct NotFoundHelp: View {
     }
 }
 
-/// Printer icon, name and connection state.
+/// Printer icon, name and connection state, with Refresh and the last update on the right.
 struct PrinterRow: View {
     let model: InkModel
 
@@ -374,11 +422,25 @@ struct PrinterRow: View {
                 .font(.subheadline)
             }
             Spacer()
-            if model.isReading {
-                ProgressView().controlSize(.small)
+            VStack(spacing: 4) {
+                RefreshButton(model: model)
+                    .labelStyle(.titleAndIcon)
+                    .glassButtons()
+                updated
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 2)
+    }
+
+    /// "Updated at 14:06" under Refresh. A blank line before the first reading keeps the height.
+    private var updated: Text {
+        if let date = model.lastUpdate {
+            Text("Updated at \(date, style: .time)")
+        } else {
+            Text(verbatim: " ")
+        }
     }
 }
 
@@ -441,16 +503,20 @@ struct InkBar: View {
     let lowThreshold: Int
     let fill: AnyShapeStyle
     var showsMark = true
-    var height: CGFloat = 8
+    var height: CGFloat = 10
 
     var body: some View {
         GeometryReader { geo in
             let width = geo.size.width
             let fraction = CGFloat(min(max(level ?? 0, 0), 100)) / 100
             ZStack(alignment: .leading) {
-                Capsule().fill(.quaternary)
+                GlassTrack()
                 Capsule()
                     .fill(fill)
+                    // Light along the top edge, like a glass tube.
+                    .overlay(Capsule().fill(LinearGradient(colors: [.white.opacity(0.45), .clear],
+                                                           startPoint: .top, endPoint: .center)))
+                    .overlay(Capsule().strokeBorder(.white.opacity(0.25), lineWidth: 0.5))
                     .frame(width: max(fraction > 0 ? height : 0, width * fraction))
                 if showsMark {
                     Rectangle()
@@ -463,6 +529,17 @@ struct InkBar: View {
         .frame(height: height)
         .padding(.vertical, 3)
         .accessibilityHidden(true)
+    }
+}
+
+/// Empty part of the ink bar: Liquid Glass on macOS 26 and later, a grey capsule before that.
+private struct GlassTrack: View {
+    var body: some View {
+        if #available(macOS 26, *) {
+            Capsule().fill(.quaternary.opacity(0.5)).glassEffect(.regular, in: Capsule())
+        } else {
+            Capsule().fill(.quaternary)
+        }
     }
 }
 
