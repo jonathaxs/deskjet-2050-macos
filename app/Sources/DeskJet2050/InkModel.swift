@@ -1,6 +1,5 @@
 import Foundation
 import Observation
-import SwiftUI
 
 /// Keeps the last ink reading and refreshes it.
 @MainActor
@@ -23,7 +22,16 @@ final class InkModel {
 
     init() {}
 
-    /// Rows shown greyed out while the first reading runs.
+    /// Levels for the window: the last reading, kept while the printer is busy or a new reading runs,
+    /// and none when the printer is gone (the window then shows grey bars).
+    var shownLevels: (cartridges: [Cartridge], lowThreshold: Int)? {
+        switch status {
+        case .notFound, .noReply: nil
+        default: lastLevels
+        }
+    }
+
+    /// Rows shown with grey bars while there is no reading.
     static let placeholder = [
         Cartridge(label: "CMY", name: "Tri-color", state: "", level: nil),
         Cartridge(label: "K", name: "Black", state: "", level: nil),
@@ -55,20 +63,17 @@ final class InkModel {
             if case .busy = reading { continue }
             break
         }
-        // Animated, so the bars grow from the placeholder and the window changes size smoothly.
-        withAnimation(.smooth(duration: 0.6)) {
-            switch reading {
-            case .levels(let cartridges, let low):
-                status = .levels(cartridges, lowThreshold: low)
-                lastLevels = (cartridges, low)
-                lastUpdate = .now
-            case .notFound:
-                status = .notFound
-            case .busy:
-                status = .busy
-            case .noReply:
-                status = .noReply
-            }
+        switch reading {
+        case .levels(let cartridges, let low):
+            status = .levels(cartridges, lowThreshold: low)
+            lastLevels = (cartridges, low)
+            lastUpdate = .now
+        case .notFound:
+            status = .notFound
+        case .busy:
+            status = .busy
+        case .noReply:
+            status = .noReply
         }
     }
 

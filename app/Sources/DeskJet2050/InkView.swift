@@ -1,12 +1,41 @@
 import AppKit
 import SwiftUI
 
-/// Main window, laid out like System Settings: the printer, its cartridges, and the app options.
+/// Main window, laid out like System Settings. Settings open as a page in the same window, with Back.
 struct InkView: View {
     @Bindable var model: InkModel
     let driver: DriverModel
     @State private var showSettings = false
     @State private var confirmUninstall = false
+
+    var body: some View {
+        NavigationStack {
+            MainPage(model: model, driver: driver, showSettings: $showSettings) { confirmUninstall = true }
+                .navigationDestination(isPresented: $showSettings) {
+                    SettingsView(driver: driver) { confirmUninstall = true }
+                }
+        }
+        .frame(width: 460)
+        .fixedSize(horizontal: false, vertical: true)
+        .onReceive(NotificationCenter.default.publisher(for: .showSettings)) { _ in showSettings = true }
+        #if DEBUG
+        // `--open-settings` starts on the Settings page, to check it without clicking.
+        .onAppear { if CommandLine.arguments.contains("--open-settings") { showSettings = true } }
+        #endif
+        .confirmationDialog("Uninstall the driver?", isPresented: $confirmUninstall) {
+            Button("Uninstall", role: .destructive) { driver.uninstall() }
+        } message: {
+            Text("This removes the driver and the printer queue. You can install it again later.")
+        }
+    }
+}
+
+/// First page: the printer with Refresh and Settings under it, the ink, and help when something is missing.
+struct MainPage: View {
+    let model: InkModel
+    let driver: DriverModel
+    @Binding var showSettings: Bool
+    let requestUninstall: () -> Void
 
     var body: some View {
         Form {
@@ -16,85 +45,54 @@ struct InkView: View {
                     Label(hint, systemImage: "info.circle")
                         .foregroundStyle(.secondary)
                 }
+            } footer: {
+                HStack(spacing: 12) {
+                    Button("Refresh") {
+                        Task { await model.refresh() }
+                    }
+                    .keyboardShortcut("r")
+                    .disabled(model.isReading)
+                    Button("Settings") { showSettings = true }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 6)
+            }
+
+            // Always on screen, so the window keeps its size. Without a reading the bars are just grey.
+            let shown = model.shownLevels
+            Section {
+                if let shown, shown.cartridges.isEmpty {
+                    Text("No cartridges reported").foregroundStyle(.secondary)
+                }
+                ForEach(shown?.cartridges ?? InkModel.placeholder) { cartridge in
+                    CartridgeRow(cartridge: cartridge, lowThreshold: shown?.lowThreshold ?? 20,
+                                 showsDetails: shown != nil)
+                }
+            } header: {
+                Text("Ink")
+            } footer: {
+                Text("Estimates from the printer. It warns when a cartridge reaches \(shown?.lowThreshold ?? 20)%.")
+                    .foregroundStyle(.secondary)
+                    .font(.footnote)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             if case .notFound = model.status {
                 NotFoundHelp()
             }
 
-            if model.lastLevels == nil, case .loading = model.status {
-                // Same rows as a real reading, greyed out, so the window does not jump when the levels arrive.
-                Section {
-                    ForEach(InkModel.placeholder) { cartridge in
-                        CartridgeRow(cartridge: cartridge, lowThreshold: 20)
-                            .redacted(reason: .placeholder)
-                    }
-                } header: {
-                    Text("Ink")
-                }
-            }
-
-            if let last = model.lastLevels {
-                Section {
-                    if last.cartridges.isEmpty {
-                        Text("No cartridges reported").foregroundStyle(.secondary)
-                    }
-                    ForEach(last.cartridges) { cartridge in
-                        CartridgeRow(cartridge: cartridge, lowThreshold: last.lowThreshold)
-                    }
-                } header: {
-                    Text("Ink")
-                } footer: {
-                    Text("Estimates from the printer. It warns when a cartridge reaches \(last.lowThreshold)%.")
-                        .foregroundStyle(.secondary)
-                        .font(.footnote)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-
-            // Reinstall and Uninstall live in Settings; the main window only offers Install when it is needed,
-            // and shows the progress while Terminal runs (the Settings popover closes when Terminal opens).
-            if driver.status == .notInstalled || driver.status == .noQueue || driver.waitingForTerminal {
-                DriverSection(driver: driver) { confirmUninstall = true }
+            // Reinstall and Uninstall live in Settings; the main window only offers Install when it is needed.
+            if driver.status == .notInstalled || driver.status == .noQueue {
+                DriverSection(driver: driver, requestUninstall: requestUninstall)
             }
         }
         .formStyle(.grouped)
-        .frame(width: 460)
-        .fixedSize(horizontal: false, vertical: true)
+        .scrollIndicators(.never)
+        .scrollBounceBehavior(.basedOnSize)
         .navigationTitle("DeskJet 2050")
         .navigationSubtitle(subtitle)
-        .toolbar {
-            ToolbarItemGroup {
-                Button {
-                    Task { await model.refresh() }
-                } label: {
-                    Label("Refresh", systemImage: "arrow.clockwise")
-                }
-                .help(Text("Refresh"))
-                .keyboardShortcut("r")
-                .disabled(model.isReading)
-                Button {
-                    showSettings.toggle()
-                } label: {
-                    Label("Settings", systemImage: "gearshape")
-                }
-                .help(Text("Settings"))
-                .popover(isPresented: $showSettings, arrowEdge: .bottom) {
-                    SettingsView(driver: driver) {
-                        // The dialog belongs to the window; a popover cannot hold it.
-                        showSettings = false
-                        confirmUninstall = true
-                    }
-                }
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .showSettings)) { _ in showSettings = true }
-        .confirmationDialog("Uninstall the driver?", isPresented: $confirmUninstall) {
-            Button("Uninstall", role: .destructive) { driver.uninstall() }
-        } message: {
-            Text("This removes the driver and the printer queue. You can install it again later.")
-        }
+        .hiddenToolbarLine()
     }
 
     private var subtitle: Text {
@@ -106,12 +104,24 @@ struct InkView: View {
     }
 }
 
+extension View {
+    /// Hides the line under the title bar, which sits right under the "Updated at" subtitle.
+    @ViewBuilder
+    func hiddenToolbarLine() -> some View {
+        if #available(macOS 15, *) {
+            toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+        } else {
+            self
+        }
+    }
+}
+
 extension Notification.Name {
-    /// Sent by the app menu's Settings… item (⌘,) to open the popover.
+    /// Sent by the app menu's Settings… item (⌘,) to open the Settings page.
     static let showSettings = Notification.Name("showSettings")
 }
 
-/// Settings popover (gear button or ⌘,): the driver and the menu bar option.
+/// Settings page (Settings button or ⌘,): the driver and the menu bar option. Back is in the title bar.
 struct SettingsView: View {
     let driver: DriverModel
     let requestUninstall: () -> Void
@@ -128,8 +138,10 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 420)
-        .fixedSize(horizontal: false, vertical: true)
+        .scrollIndicators(.never)
+        .scrollBounceBehavior(.basedOnSize)
+        .navigationTitle("Settings")
+        .hiddenToolbarLine()
         .task { await driver.check() }
     }
 }
@@ -319,6 +331,8 @@ struct PrinterRow: View {
 struct CartridgeRow: View {
     let cartridge: Cartridge
     let lowThreshold: Int
+    /// False while there is no reading: only the name and a grey bar, same height as a real row.
+    var showsDetails = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -329,8 +343,10 @@ struct CartridgeRow: View {
                 Text(verbatim: cartridge.level.map { "\($0)%" } ?? "–")
                     .font(.body.weight(.semibold).monospacedDigit())
             }
-            InkBar(level: cartridge.level, lowThreshold: lowThreshold, fill: cartridge.fill)
+            InkBar(level: cartridge.level, lowThreshold: lowThreshold, fill: cartridge.fill, showsMark: showsDetails)
             state
+                .opacity(showsDetails ? 1 : 0)
+                .accessibilityHidden(!showsDetails)
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
@@ -369,6 +385,7 @@ struct InkBar: View {
     let level: Int?
     let lowThreshold: Int
     let fill: AnyShapeStyle
+    var showsMark = true
     var height: CGFloat = 8
 
     var body: some View {
@@ -380,14 +397,15 @@ struct InkBar: View {
                 Capsule()
                     .fill(fill)
                     .frame(width: max(fraction > 0 ? height : 0, width * fraction))
-                Rectangle()
-                    .fill(.secondary)
-                    .frame(width: 1.5, height: geo.size.height + 6)
-                    .offset(x: width * CGFloat(lowThreshold) / 100)
+                if showsMark {
+                    Rectangle()
+                        .fill(.secondary)
+                        .frame(width: 1.5, height: geo.size.height + 6)
+                        .offset(x: width * CGFloat(lowThreshold) / 100)
+                }
             }
         }
         .frame(height: height)
-        .animation(.smooth(duration: 0.8), value: level)
         .padding(.vertical, 3)
         .accessibilityHidden(true)
     }
