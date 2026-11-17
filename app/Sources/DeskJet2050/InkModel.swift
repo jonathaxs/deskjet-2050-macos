@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftUI
 
 /// Keeps the last ink reading and refreshes it.
 @MainActor
@@ -21,6 +22,12 @@ final class InkModel {
     private(set) var lastLevels: (cartridges: [Cartridge], lowThreshold: Int)?
 
     init() {}
+
+    /// Rows shown greyed out while the first reading runs.
+    static let placeholder = [
+        Cartridge(label: "CMY", name: "Tri-color", state: "", level: nil),
+        Cartridge(label: "K", name: "Black", state: "", level: nil),
+    ]
 
     /// For previews and screenshots: a model that already has a reading.
     init(sample status: Status, updated: Date = .now) {
@@ -48,17 +55,20 @@ final class InkModel {
             if case .busy = reading { continue }
             break
         }
-        switch reading {
-        case .levels(let cartridges, let low):
-            status = .levels(cartridges, lowThreshold: low)
-            lastLevels = (cartridges, low)
-            lastUpdate = .now
-        case .notFound:
-            status = .notFound
-        case .busy:
-            status = .busy
-        case .noReply:
-            status = .noReply
+        // Animated, so the bars grow from the placeholder and the window changes size smoothly.
+        withAnimation(.smooth(duration: 0.6)) {
+            switch reading {
+            case .levels(let cartridges, let low):
+                status = .levels(cartridges, lowThreshold: low)
+                lastLevels = (cartridges, low)
+                lastUpdate = .now
+            case .notFound:
+                status = .notFound
+            case .busy:
+                status = .busy
+            case .noReply:
+                status = .noReply
+            }
         }
     }
 

@@ -5,6 +5,8 @@ import SwiftUI
 struct InkView: View {
     @Bindable var model: InkModel
     let driver: DriverModel
+    @State private var showSettings = false
+    @State private var confirmUninstall = false
 
     var body: some View {
         Form {
@@ -18,6 +20,18 @@ struct InkView: View {
 
             if case .notFound = model.status {
                 NotFoundHelp()
+            }
+
+            if model.lastLevels == nil, case .loading = model.status {
+                // Same rows as a real reading, greyed out, so the window does not jump when the levels arrive.
+                Section {
+                    ForEach(InkModel.placeholder) { cartridge in
+                        CartridgeRow(cartridge: cartridge, lowThreshold: 20)
+                            .redacted(reason: .placeholder)
+                    }
+                } header: {
+                    Text("Ink")
+                }
             }
 
             if let last = model.lastLevels {
@@ -39,9 +53,10 @@ struct InkView: View {
                 }
             }
 
-            // Reinstall and Uninstall live in Settings; the main window only offers Install when it is needed.
-            if driver.status == .notInstalled || driver.status == .noQueue {
-                DriverSection(driver: driver)
+            // Reinstall and Uninstall live in Settings; the main window only offers Install when it is needed,
+            // and shows the progress while Terminal runs (the Settings popover closes when Terminal opens).
+            if driver.status == .notInstalled || driver.status == .noQueue || driver.waitingForTerminal {
+                DriverSection(driver: driver) { confirmUninstall = true }
             }
         }
         .formStyle(.grouped)
@@ -51,10 +66,6 @@ struct InkView: View {
         .navigationSubtitle(subtitle)
         .toolbar {
             ToolbarItemGroup {
-                SettingsLink {
-                    Label("Settings", systemImage: "gearshape")
-                }
-                .help(Text("Settings"))
                 Button {
                     Task { await model.refresh() }
                 } label: {
@@ -63,7 +74,26 @@ struct InkView: View {
                 .help(Text("Refresh"))
                 .keyboardShortcut("r")
                 .disabled(model.isReading)
+                Button {
+                    showSettings.toggle()
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .help(Text("Settings"))
+                .popover(isPresented: $showSettings, arrowEdge: .bottom) {
+                    SettingsView(driver: driver) {
+                        // The dialog belongs to the window; a popover cannot hold it.
+                        showSettings = false
+                        confirmUninstall = true
+                    }
+                }
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showSettings)) { _ in showSettings = true }
+        .confirmationDialog("Uninstall the driver?", isPresented: $confirmUninstall) {
+            Button("Uninstall", role: .destructive) { driver.uninstall() }
+        } message: {
+            Text("This removes the driver and the printer queue. You can install it again later.")
         }
     }
 
@@ -76,14 +106,20 @@ struct InkView: View {
     }
 }
 
-/// Settings window (gear button or ⌘,): the driver and the menu bar option.
+extension Notification.Name {
+    /// Sent by the app menu's Settings… item (⌘,) to open the popover.
+    static let showSettings = Notification.Name("showSettings")
+}
+
+/// Settings popover (gear button or ⌘,): the driver and the menu bar option.
 struct SettingsView: View {
     let driver: DriverModel
+    let requestUninstall: () -> Void
     @AppStorage(AppSettings.showInMenuBar) private var showInMenuBar = false
 
     var body: some View {
         Form {
-            DriverSection(driver: driver)
+            DriverSection(driver: driver, requestUninstall: requestUninstall)
             Section {
                 Toggle(isOn: $showInMenuBar) {
                     Text("Show in the menu bar")
@@ -92,7 +128,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 460)
+        .frame(width: 420)
         .fixedSize(horizontal: false, vertical: true)
         .task { await driver.check() }
     }
@@ -101,7 +137,7 @@ struct SettingsView: View {
 /// Driver state with Install, Reinstall and Uninstall. The work happens in Terminal.
 struct DriverSection: View {
     let driver: DriverModel
-    @State private var confirmUninstall = false
+    let requestUninstall: () -> Void
 
     var body: some View {
         Section {
@@ -150,11 +186,6 @@ struct DriverSection: View {
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .confirmationDialog("Uninstall the driver?", isPresented: $confirmUninstall) {
-            Button("Uninstall", role: .destructive) { driver.uninstall() }
-        } message: {
-            Text("This removes the driver and the printer queue. You can install it again later.")
-        }
     }
 
     @ViewBuilder
@@ -169,7 +200,7 @@ struct DriverSection: View {
         case .installed:
             HStack {
                 Button("Reinstall…") { driver.install() }
-                Button("Uninstall…") { confirmUninstall = true }
+                Button("Uninstall…") { requestUninstall() }
             }
             .disabled(driver.waitingForTerminal)
         }
@@ -356,6 +387,7 @@ struct InkBar: View {
             }
         }
         .frame(height: height)
+        .animation(.smooth(duration: 0.8), value: level)
         .padding(.vertical, 3)
         .accessibilityHidden(true)
     }

@@ -49,8 +49,9 @@ Do the same for Uninstall.command if you ever need it.
 
 INK LEVELS
 
-System Settings > Printers & Scanners > HP Deskjet 2050 > Options & Supplies. They are updated
-on every print.
+The DeskJet 2050 app (in the same release) shows the percentage of each cartridge. It can also
+install and uninstall this driver for you. Without the app: System Settings > Printers & Scanners >
+HP Deskjet 2050 > Options & Supplies. They are updated on every print.
 
 
 UNINSTALL
@@ -109,8 +110,9 @@ Faça o mesmo com o Uninstall.command se um dia precisar.
 
 NÍVEL DE TINTA
 
-Ajustes do Sistema > Impressoras e Scanners > HP Deskjet 2050 > Opções e Suprimentos. O nível é
-atualizado a cada impressão.
+O app DeskJet 2050 (na mesma versão) mostra a porcentagem de cada cartucho. Ele também instala e
+desinstala este driver para você. Sem o app: Ajustes do Sistema > Impressoras e Scanners >
+HP Deskjet 2050 > Opções e Suprimentos. O nível é atualizado a cada impressão.
 
 
 DESINSTALAÇÃO

@@ -46,6 +46,13 @@ struct DeskJet2050App: App {
         }
         .windowResizability(.contentSize)
         .windowToolbarStyle(.unified)
+        .commands {
+            // Settings open as a popover in the window instead of a separate Settings window.
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") { NotificationCenter.default.post(name: .showSettings, object: nil) }
+                    .keyboardShortcut(",")
+            }
+        }
 
         MenuBarExtra(isInserted: $showInMenuBar) {
             MenuBarView(model: model)
@@ -54,10 +61,6 @@ struct DeskJet2050App: App {
                 .accessibilityLabel(Text(verbatim: "DeskJet 2050"))
         }
         .menuBarExtraStyle(.window)
-
-        Settings {
-            SettingsView(driver: driver)
-        }
     }
 }
 
@@ -75,15 +78,17 @@ enum Snapshot {
     static func save(to path: String) {
         _ = NSApplication.shared
         let args = CommandLine.arguments
-        let sample = args.contains("--not-found") ? InkModel(sample: .notFound) : InkModel(sample: .levels([
+        let sample = args.contains("--loading") ? InkModel(sample: .loading) : args.contains("--not-found") ? InkModel(sample: .notFound) : InkModel(sample: .levels([
             Cartridge(label: "CMY", name: "Tri-color", state: "newGenuineHP", level: 62),
             Cartridge(label: "K", name: "Black", state: "newGenuineHP", level: 20),
         ], lowThreshold: 20))
         let installed = CommandLine.arguments.contains("--not-installed") ? DriverModel.Status.notInstalled : .installed
         let driver = DriverModel(sample: installed, homebrew: !args.contains("--no-homebrew"))
         let root = CommandLine.arguments.contains("--settings")
-            ? AnyView(SettingsView(driver: driver)) : AnyView(InkView(model: sample, driver: driver))
-        let host = NSHostingView(rootView: root)
+            ? AnyView(SettingsView(driver: driver) {}) : AnyView(InkView(model: sample, driver: driver))
+        // Off screen the window does not pick up the language direction, so set it for Arabic.
+        let rtl = Locale.Language(identifier: Locale.preferredLanguages.first ?? "en").characterDirection == .rightToLeft
+        let host = NSHostingView(rootView: root.environment(\.layoutDirection, rtl ? .rightToLeft : .leftToRight))
         let size = host.fittingSize
         let window = NSWindow(contentRect: NSRect(origin: .zero, size: size),
                               styleMask: [.titled], backing: .buffered, defer: false)
