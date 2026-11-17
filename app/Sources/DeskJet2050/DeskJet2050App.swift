@@ -7,7 +7,7 @@ enum Main {
         #if DEBUG
         // `DeskJet2050 --snapshot file.png` saves the window with sample levels, to check the layout
         // without the printer. Add -AppleLanguages "(pt-BR)" for another language, --not-installed for the
-        // driver missing, --settings for the Settings window.
+        // driver missing, --no-homebrew, --not-found for the printer unplugged, --settings for Settings.
         if let i = CommandLine.arguments.firstIndex(of: "--snapshot"), i + 1 < CommandLine.arguments.count {
             MainActor.assumeIsolated { Snapshot.save(to: CommandLine.arguments[i + 1]) }
             return
@@ -74,12 +74,13 @@ enum Snapshot {
     /// Draws the real window (AppKit controls included) off screen and saves it as PNG.
     static func save(to path: String) {
         _ = NSApplication.shared
-        let sample = InkModel(sample: .levels([
+        let args = CommandLine.arguments
+        let sample = args.contains("--not-found") ? InkModel(sample: .notFound) : InkModel(sample: .levels([
             Cartridge(label: "CMY", name: "Tri-color", state: "newGenuineHP", level: 62),
             Cartridge(label: "K", name: "Black", state: "newGenuineHP", level: 20),
         ], lowThreshold: 20))
         let installed = CommandLine.arguments.contains("--not-installed") ? DriverModel.Status.notInstalled : .installed
-        let driver = DriverModel(sample: installed)
+        let driver = DriverModel(sample: installed, homebrew: !args.contains("--no-homebrew"))
         let root = CommandLine.arguments.contains("--settings")
             ? AnyView(SettingsView(driver: driver)) : AnyView(InkView(model: sample, driver: driver))
         let host = NSHostingView(rootView: root)

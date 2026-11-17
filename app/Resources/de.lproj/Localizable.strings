@@ -47,3 +47,13 @@
 "Uninstall" = "Deinstallieren";
 "This removes the driver and the printer queue. You can install it again later." = "Dadurch werden der Treiber und die Druckerwarteschlange entfernt. Du kannst ihn später wieder installieren.";
 "Settings" = "Einstellungen";
+
+/* Help: printer not found, installer requirements */
+"Can’t find the printer?" = "Drucker nicht gefunden?";
+"If the Mac asks whether to allow the accessory, click Allow. If you clicked Don’t Allow, unplug the cable and plug it in again." = "Wenn der Mac fragt, ob das Zubehör erlaubt werden soll, klicke auf „Erlauben“. Wenn du auf „Nicht erlauben“ geklickt hast, zieh das Kabel ab und steck es wieder ein.";
+"Still not found? In Privacy & Security, check “Allow accessories to connect”." = "Immer noch nichts? Prüfe in „Datenschutz & Sicherheit“ die Option „Verbinden von Zubehör erlauben“.";
+"Open…" = "Öffnen …";
+"Opens Privacy & Security in System Settings" = "Öffnet „Datenschutz & Sicherheit“ in den Systemeinstellungen";
+"Apple’s developer tools. The installer opens the window to get them." = "Die Entwicklerwerkzeuge von Apple. Das Installationsprogramm öffnet das Fenster, um sie zu laden.";
+"Needed to build the driver. Install it, then come back here." = "Wird zum Kompilieren des Treibers benötigt. Installiere es und komm dann hierher zurück.";
+"Open brew.sh" = "brew.sh öffnen";

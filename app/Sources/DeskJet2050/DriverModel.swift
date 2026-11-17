@@ -20,6 +20,9 @@ final class DriverModel {
     /// True while Terminal is running the installer or uninstaller and we are watching for the result.
     private(set) var waitingForTerminal = false
     private(set) var error: String?
+    /// What Install.command needs before it can build the driver (nil while checking).
+    private(set) var hasCommandLineTools: Bool?
+    private(set) var hasHomebrew: Bool?
 
     nonisolated static let installDir = "/Library/Printers/DeskJet2050"
     nonisolated static let ppd = "/Library/Printers/PPDs/Contents/Resources/deskjet2050-j510-hpcups.ppd"
@@ -31,14 +34,30 @@ final class DriverModel {
 
     init() {}
 
-    init(sample: Status) {
+    init(sample: Status, homebrew: Bool = true) {
         status = sample
+        hasCommandLineTools = true
+        hasHomebrew = homebrew
     }
 
     func check() async {
-        let (status, date) = await Task.detached { (Self.currentStatus(), Self.currentFilterDate()) }.value
+        let (status, date, tools, brew) = await Task.detached {
+            (Self.currentStatus(), Self.currentFilterDate(), Self.commandLineToolsInstalled(), Self.homebrewInstalled())
+        }.value
         self.status = status
         filterDate = date
+        hasCommandLineTools = tools
+        hasHomebrew = brew
+    }
+
+    /// `xcode-select -p` only prints a path when the Command Line Tools (or Xcode) are there.
+    nonisolated static func commandLineToolsInstalled() -> Bool {
+        run("/usr/bin/xcode-select", ["-p"])
+    }
+
+    /// Same places Install.command looks when brew is not in the PATH.
+    nonisolated static func homebrewInstalled() -> Bool {
+        ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"].contains { FileManager.default.isExecutableFile(atPath: $0) }
     }
 
     nonisolated static func currentFilterDate() -> Date? {
@@ -56,9 +75,14 @@ final class DriverModel {
     }
 
     nonisolated private static func queueExists() -> Bool {
+        run("/usr/bin/lpstat", ["-p", queue])
+    }
+
+    /// Runs a command quietly; true when it exits with 0.
+    nonisolated private static func run(_ path: String, _ arguments: [String]) -> Bool {
         let p = Process()
-        p.executableURL = URL(fileURLWithPath: "/usr/bin/lpstat")
-        p.arguments = ["-p", queue]
+        p.executableURL = URL(fileURLWithPath: path)
+        p.arguments = arguments
         p.standardOutput = FileHandle.nullDevice
         p.standardError = FileHandle.nullDevice
         do {

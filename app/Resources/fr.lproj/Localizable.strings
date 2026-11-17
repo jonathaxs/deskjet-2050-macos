@@ -47,3 +47,13 @@
 "Uninstall" = "Désinstaller";
 "This removes the driver and the printer queue. You can install it again later." = "Cela supprime le pilote et la file d’attente de l’imprimante. Vous pourrez le réinstaller plus tard.";
 "Settings" = "Réglages";
+
+/* Help: printer not found, installer requirements */
+"Can’t find the printer?" = "Imprimante introuvable ?";
+"If the Mac asks whether to allow the accessory, click Allow. If you clicked Don’t Allow, unplug the cable and plug it in again." = "Si le Mac demande d’autoriser l’accessoire, cliquez sur Autoriser. Si vous avez cliqué sur Ne pas autoriser, débranchez le câble et rebranchez-le.";
+"Still not found? In Privacy & Security, check “Allow accessories to connect”." = "Toujours rien ? Dans Confidentialité et sécurité, vérifiez « Autoriser les accessoires à se connecter ».";
+"Open…" = "Ouvrir…";
+"Opens Privacy & Security in System Settings" = "Ouvre Confidentialité et sécurité dans Réglages Système";
+"Apple’s developer tools. The installer opens the window to get them." = "Les outils de développement d’Apple. L’installateur ouvre la fenêtre pour les obtenir.";
+"Needed to build the driver. Install it, then come back here." = "Nécessaire pour compiler le pilote. Installez-le, puis revenez ici.";
+"Open brew.sh" = "Ouvrir brew.sh";

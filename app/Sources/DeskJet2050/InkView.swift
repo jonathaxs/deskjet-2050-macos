@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// Main window, laid out like System Settings: the printer, its cartridges, and the app options.
@@ -15,6 +16,10 @@ struct InkView: View {
                 }
             }
 
+            if case .notFound = model.status {
+                NotFoundHelp()
+            }
+
             if let last = model.lastLevels {
                 Section {
                     if last.cartridges.isEmpty {
@@ -29,6 +34,7 @@ struct InkView: View {
                     Text("Estimates from the printer. It warns when a cartridge reaches \(last.lowThreshold)%.")
                         .foregroundStyle(.secondary)
                         .font(.footnote)
+                        .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
@@ -112,6 +118,14 @@ struct DriverSection: View {
                 buttons
             }
             .padding(.vertical, 2)
+            if driver.status == .notInstalled || driver.status == .noQueue {
+                RequirementRow(title: "Command Line Tools", ok: driver.hasCommandLineTools,
+                               missing: "Apple’s developer tools. The installer opens the window to get them.")
+                RequirementRow(title: "Homebrew", ok: driver.hasHomebrew,
+                               missing: "Needed to build the driver. Install it, then come back here.") {
+                    Link("Open brew.sh", destination: URL(string: "https://brew.sh")!)
+                }
+            }
             if driver.waitingForTerminal {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
@@ -133,6 +147,7 @@ struct DriverSection: View {
             Text("Terminal opens to finish. Type your Mac password there: this app never sees it.")
                 .foregroundStyle(.secondary)
                 .font(.footnote)
+                .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .confirmationDialog("Uninstall the driver?", isPresented: $confirmUninstall) {
@@ -175,6 +190,68 @@ struct DriverSection: View {
         case .installed: .green
         case .noQueue: .orange
         case .notInstalled: .red
+        }
+    }
+}
+
+/// One thing the installer needs, with a check mark or what to do about it.
+struct RequirementRow<Action: View>: View {
+    let title: LocalizedStringKey
+    let ok: Bool?
+    let missing: LocalizedStringKey
+    @ViewBuilder var action: () -> Action
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Group {
+                switch ok {
+                case nil: Image(systemName: "circle.dotted").foregroundStyle(.secondary)
+                case true?: Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                case false?: Image(systemName: "xmark.circle.fill").foregroundStyle(.orange)
+                }
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                if ok == false {
+                    Text(missing).foregroundStyle(.secondary).font(.subheadline)
+                }
+            }
+            Spacer()
+            if ok == false { action() }
+        }
+    }
+}
+
+extension RequirementRow where Action == EmptyView {
+    init(title: LocalizedStringKey, ok: Bool?, missing: LocalizedStringKey) {
+        self.init(title: title, ok: ok, missing: missing) { EmptyView() }
+    }
+}
+
+/// Steps for when the Mac does not see the printer, including the USB accessory permission.
+struct NotFoundHelp: View {
+    static let securitySettings = URL(string: "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Security")!
+
+    var body: some View {
+        Section {
+            step(1, "Turn the printer on and plug it into the Mac with the USB cable.")
+            step(2, "If the Mac asks whether to allow the accessory, click Allow. If you clicked Don’t Allow, unplug the cable and plug it in again.")
+            HStack(alignment: .firstTextBaseline) {
+                step(3, "Still not found? In Privacy & Security, check “Allow accessories to connect”.")
+                Spacer()
+                Button("Open…") { NSWorkspace.shared.open(Self.securitySettings) }
+                    .help(Text("Opens Privacy & Security in System Settings"))
+            }
+        } header: {
+            Text("Can’t find the printer?")
+        }
+    }
+
+    private func step(_ n: Int, _ text: LocalizedStringKey) -> some View {
+        Label {
+            Text(text)
+        } icon: {
+            Image(systemName: "\(n).circle.fill").foregroundStyle(.secondary)
         }
     }
 }
@@ -348,7 +425,6 @@ extension InkModel {
     /// What to do when the printer could not be read.
     var problemHint: LocalizedStringKey? {
         switch status {
-        case .notFound: "Turn the printer on and plug it into the Mac with the USB cable."
         case .busy: "It is probably printing. Try again in a moment."
         case .noReply: "Turn it off and on again, then refresh."
         default: nil
