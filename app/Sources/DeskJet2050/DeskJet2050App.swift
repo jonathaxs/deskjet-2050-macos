@@ -7,7 +7,7 @@ enum Main {
         #if DEBUG
         // `DeskJet2050 --snapshot file.png` saves the window with sample levels, to check the layout
         // without the printer. Add -AppleLanguages "(pt-BR)" for another language, --not-installed for the
-        // driver missing, --no-homebrew, --not-found for the printer unplugged, --settings for Settings.
+        // driver missing, --no-homebrew, --not-found for the printer unplugged, --settings or --driver for a popover.
         if let i = CommandLine.arguments.firstIndex(of: "--snapshot"), i + 1 < CommandLine.arguments.count {
             MainActor.assumeIsolated { Snapshot.save(to: CommandLine.arguments[i + 1]) }
             return
@@ -29,6 +29,7 @@ struct DeskJet2050App: App {
     @State private var model = InkModel()
     @State private var driver = DriverModel()
     @AppStorage(AppSettings.showInMenuBar) private var showInMenuBar = false
+    @AppStorage(AppSettings.appearance) private var appearance = Appearance.system
 
     var body: some Scene {
         Window("DeskJet 2050", id: "main") {
@@ -43,6 +44,7 @@ struct DeskJet2050App: App {
                         await model.refreshIfOld()
                     }
                 }
+                .onChange(of: appearance, initial: true) { appearance.apply() }
         }
         .windowResizability(.contentSize)
         .windowToolbarStyle(.unified)
@@ -85,7 +87,8 @@ enum Snapshot {
         let installed = CommandLine.arguments.contains("--not-installed") ? DriverModel.Status.notInstalled : .installed
         let driver = DriverModel(sample: installed, homebrew: !args.contains("--no-homebrew"))
         let root = CommandLine.arguments.contains("--settings")
-            ? AnyView(SettingsView(driver: driver) {}) : AnyView(InkView(model: sample, driver: driver))
+            ? AnyView(SettingsView()) : args.contains("--driver")
+            ? AnyView(DriverPopover(driver: driver) {}) : AnyView(InkView(model: sample, driver: driver))
         // Off screen the window does not pick up the language direction, so set it for Arabic.
         let rtl = Locale.Language(identifier: Locale.preferredLanguages.first ?? "en").characterDirection == .rightToLeft
         let host = NSHostingView(rootView: root.environment(\.layoutDirection, rtl ? .rightToLeft : .leftToRight))

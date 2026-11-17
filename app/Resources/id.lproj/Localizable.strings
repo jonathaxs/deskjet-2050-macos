@@ -54,3 +54,7 @@
 "Needed to build the driver. Install it, then come back here." = "Diperlukan untuk membangun driver. Instal, lalu kembali ke sini.";
 "Open brew.sh" = "Buka brew.sh";
 "Settings…" = "Pengaturan…";
+"Appearance" = "Tampilan";
+"Same as the Mac" = "Sama seperti Mac";
+"Light" = "Terang";
+"Dark" = "Gelap";

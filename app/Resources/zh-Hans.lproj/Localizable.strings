@@ -54,3 +54,7 @@
 "Needed to build the driver. Install it, then come back here." = "构建驱动程序需要它。请安装后再回到这里。";
 "Open brew.sh" = "打开 brew.sh";
 "Settings…" = "设置…";
+"Appearance" = "外观";
+"Same as the Mac" = "与 Mac 相同";
+"Light" = "浅色";
+"Dark" = "深色";

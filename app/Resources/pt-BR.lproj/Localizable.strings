@@ -58,3 +58,7 @@
 "Needed to build the driver. Install it, then come back here." = "Necessário para compilar o driver. Instale e depois volte aqui.";
 "Open brew.sh" = "Abrir brew.sh";
 "Settings…" = "Ajustes…";
+"Appearance" = "Aparência";
+"Same as the Mac" = "Igual ao Mac";
+"Light" = "Clara";
+"Dark" = "Escura";

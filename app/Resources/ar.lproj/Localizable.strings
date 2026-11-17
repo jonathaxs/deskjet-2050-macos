@@ -54,3 +54,7 @@
 "Needed to build the driver. Install it, then come back here." = "مطلوب لبناء برنامج التشغيل. ثبّته ثم عُد إلى هنا.";
 "Open brew.sh" = "فتح brew.sh";
 "Settings…" = "الإعدادات…";
+"Appearance" = "المظهر";
+"Same as the Mac" = "مثل الـ Mac";
+"Light" = "فاتح";
+"Dark" = "داكن";

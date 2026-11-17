@@ -1,26 +1,29 @@
 import AppKit
 import SwiftUI
 
-/// Main window, laid out like System Settings. Settings open as a page in the same window, with Back.
+/// Main window, laid out like System Settings. Driver and Settings open as popovers inside it.
 struct InkView: View {
     @Bindable var model: InkModel
     let driver: DriverModel
+    @State private var showDriver = false
     @State private var showSettings = false
     @State private var confirmUninstall = false
 
     var body: some View {
-        NavigationStack {
-            MainPage(model: model, driver: driver, showSettings: $showSettings) { confirmUninstall = true }
-                .navigationDestination(isPresented: $showSettings) {
-                    SettingsView(driver: driver) { confirmUninstall = true }
-                }
+        MainPage(model: model, driver: driver, showDriver: $showDriver, showSettings: $showSettings) {
+            // Close the popover first, so the question shows on the window.
+            showDriver = false
+            confirmUninstall = true
         }
         .frame(width: 460)
         .fixedSize(horizontal: false, vertical: true)
         .onReceive(NotificationCenter.default.publisher(for: .showSettings)) { _ in showSettings = true }
         #if DEBUG
-        // `--open-settings` starts on the Settings page, to check it without clicking.
-        .onAppear { if CommandLine.arguments.contains("--open-settings") { showSettings = true } }
+        // `--open-settings` and `--open-driver` start with that popover open, to check it without clicking.
+        .onAppear {
+            showSettings = CommandLine.arguments.contains("--open-settings")
+            showDriver = CommandLine.arguments.contains("--open-driver")
+        }
         #endif
         .confirmationDialog("Uninstall the driver?", isPresented: $confirmUninstall) {
             Button("Uninstall", role: .destructive) { driver.uninstall() }
@@ -30,10 +33,11 @@ struct InkView: View {
     }
 }
 
-/// First page: the printer with Refresh and Settings under it, the ink, and help when something is missing.
+/// First page: Driver, Settings and Refresh above the printer, the ink, and help when something is missing.
 struct MainPage: View {
     let model: InkModel
     let driver: DriverModel
+    @Binding var showDriver: Bool
     @Binding var showSettings: Bool
     let requestUninstall: () -> Void
 
@@ -45,17 +49,37 @@ struct MainPage: View {
                     Label(hint, systemImage: "info.circle")
                         .foregroundStyle(.secondary)
                 }
-            } footer: {
-                HStack(spacing: 12) {
-                    Button("Refresh") {
-                        Task { await model.refresh() }
+            } header: {
+                VStack(spacing: 8) {
+                    HStack(spacing: 10) {
+                        Button { showDriver = true } label: {
+                            Label("Driver", systemImage: "shippingbox")
+                        }
+                        Button { showSettings = true } label: {
+                            Label("Settings", systemImage: "gearshape")
+                        }
+                        Button { Task { await model.refresh() } } label: {
+                            Label("Refresh", systemImage: "arrow.clockwise")
+                        }
+                        .keyboardShortcut("r")
+                        .disabled(model.isReading)
                     }
-                    .keyboardShortcut("r")
-                    .disabled(model.isReading)
-                    Button("Settings") { showSettings = true }
+                    .glassButtons()
+                    // Anchored to the whole row, so both popovers open centered in the window.
+                    .popover(isPresented: $showDriver, attachmentAnchor: .rect(.bounds), arrowEdge: .bottom) {
+                        DriverPopover(driver: driver, requestUninstall: requestUninstall)
+                    }
+                    .popover(isPresented: $showSettings, attachmentAnchor: .rect(.bounds), arrowEdge: .bottom) {
+                        SettingsView()
+                    }
+                    updated
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
+                .labelStyle(.titleAndIcon)
+                .textCase(nil)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 6)
+                .padding(.bottom, 6)
             }
 
             // Always on screen, so the window keeps its size. Without a reading the bars are just grey.
@@ -90,22 +114,31 @@ struct MainPage: View {
         .formStyle(.grouped)
         .scrollIndicators(.never)
         .scrollBounceBehavior(.basedOnSize)
-        .navigationTitle("DeskJet 2050")
-        .navigationSubtitle(subtitle)
         .hiddenToolbarLine()
     }
 
-    private var subtitle: Text {
+    /// "Updated at 14:06" under the buttons. A blank line before the first reading keeps the height.
+    private var updated: Text {
         if let date = model.lastUpdate {
             Text("Updated at \(date, style: .time)")
         } else {
-            Text(verbatim: "")
+            Text(verbatim: " ")
         }
     }
 }
 
 extension View {
-    /// Hides the line under the title bar, which sits right under the "Updated at" subtitle.
+    /// Liquid Glass buttons on macOS 26 and later, regular bordered buttons before that.
+    @ViewBuilder
+    func glassButtons() -> some View {
+        if #available(macOS 26, *) {
+            buttonStyle(.glass)
+        } else {
+            buttonStyle(.bordered)
+        }
+    }
+
+    /// Hides the line under the title bar.
     @ViewBuilder
     func hiddenToolbarLine() -> some View {
         if #available(macOS 15, *) {
@@ -117,20 +150,24 @@ extension View {
 }
 
 extension Notification.Name {
-    /// Sent by the app menu's Settings… item (⌘,) to open the Settings page.
+    /// Sent by the app menu's Settings… item (⌘,) to open the Settings popover.
     static let showSettings = Notification.Name("showSettings")
 }
 
-/// Settings page (Settings button or ⌘,): the driver and the menu bar option. Back is in the title bar.
+/// Popover width: narrower than the window (460), so it opens inside it.
+private let popoverWidth: CGFloat = 400
+
+/// Settings popover (Settings button or ⌘,): the appearance and the menu bar option.
 struct SettingsView: View {
-    let driver: DriverModel
-    let requestUninstall: () -> Void
     @AppStorage(AppSettings.showInMenuBar) private var showInMenuBar = false
+    @AppStorage(AppSettings.appearance) private var appearance = Appearance.system
 
     var body: some View {
         Form {
-            DriverSection(driver: driver, requestUninstall: requestUninstall)
             Section {
+                Picker("Appearance", selection: $appearance) {
+                    ForEach(Appearance.allCases) { Text($0.title).tag($0) }
+                }
                 Toggle(isOn: $showInMenuBar) {
                     Text("Show in the menu bar")
                     Text("Shows the ink levels next to the clock.")
@@ -138,10 +175,25 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .scrollIndicators(.never)
-        .scrollBounceBehavior(.basedOnSize)
-        .navigationTitle("Settings")
-        .hiddenToolbarLine()
+        .scrollDisabled(true)
+        .frame(width: popoverWidth)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// Driver popover: Install, Reinstall and Uninstall.
+struct DriverPopover: View {
+    let driver: DriverModel
+    let requestUninstall: () -> Void
+
+    var body: some View {
+        Form {
+            DriverSection(driver: driver, requestUninstall: requestUninstall)
+        }
+        .formStyle(.grouped)
+        .scrollDisabled(true)
+        .frame(width: popoverWidth)
+        .fixedSize(horizontal: false, vertical: true)
         .task { await driver.check() }
     }
 }
@@ -192,11 +244,14 @@ struct DriverSection: View {
         } header: {
             Text("Driver")
         } footer: {
-            Text("Terminal opens to finish. Type your Mac password there: this app never sees it.")
-                .foregroundStyle(.secondary)
-                .font(.footnote)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            // In the popover the footer is right-aligned by default; the Spacer keeps it on the left.
+            HStack {
+                Text("Terminal opens to finish. Type your Mac password there: this app never sees it.")
+                    .foregroundStyle(.secondary)
+                    .font(.footnote)
+                    .multilineTextAlignment(.leading)
+                Spacer(minLength: 0)
+            }
         }
     }
 

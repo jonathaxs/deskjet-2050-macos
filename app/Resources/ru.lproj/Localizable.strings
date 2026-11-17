@@ -54,3 +54,7 @@
 "Needed to build the driver. Install it, then come back here." = "Нужен для сборки драйвера. Установите его и вернитесь сюда.";
 "Open brew.sh" = "Открыть brew.sh";
 "Settings…" = "Настройки…";
+"Appearance" = "Оформление";
+"Same as the Mac" = "Как на Mac";
+"Light" = "Светлое";
+"Dark" = "Темное";

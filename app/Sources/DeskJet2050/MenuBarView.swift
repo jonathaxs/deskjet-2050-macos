@@ -4,6 +4,32 @@ import SwiftUI
 enum AppSettings {
     /// UserDefaults key: show the optional icon in the menu bar (off by default).
     static let showInMenuBar = "showInMenuBar"
+    /// UserDefaults key: light, dark or the Mac's setting (the default).
+    static let appearance = "appearance"
+}
+
+/// The look chosen in Settings. "system" follows the Mac.
+enum Appearance: String, CaseIterable, Identifiable {
+    case system, light, dark
+    var id: String { rawValue }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .system: "Same as the Mac"
+        case .light: "Light"
+        case .dark: "Dark"
+        }
+    }
+
+    /// Applies to every window of the app, the menu bar panel included.
+    @MainActor
+    func apply() {
+        switch self {
+        case .system: NSApp.appearance = nil
+        case .light: NSApp.appearance = NSAppearance(named: .aqua)
+        case .dark: NSApp.appearance = NSAppearance(named: .darkAqua)
+        }
+    }
 }
 
 /// Small panel that opens from the menu bar icon.

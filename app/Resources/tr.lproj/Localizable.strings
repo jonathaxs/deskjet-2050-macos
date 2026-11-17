@@ -54,3 +54,7 @@
 "Needed to build the driver. Install it, then come back here." = "Sürücüyü derlemek için gerekli. Yükleyin ve sonra buraya dönün.";
 "Open brew.sh" = "brew.sh’i Aç";
 "Settings…" = "Ayarlar…";
+"Appearance" = "Görünüm";
+"Same as the Mac" = "Mac ile aynı";
+"Light" = "Açık";
+"Dark" = "Koyu";

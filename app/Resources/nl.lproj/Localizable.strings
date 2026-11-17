@@ -54,3 +54,7 @@
 "Needed to build the driver. Install it, then come back here." = "Nodig om de driver te bouwen. Installeer het en kom dan hier terug.";
 "Open brew.sh" = "Open brew.sh";
 "Settings…" = "Instellingen…";
+"Appearance" = "Weergave";
+"Same as the Mac" = "Zoals de Mac";
+"Light" = "Licht";
+"Dark" = "Donker";

@@ -58,3 +58,7 @@
 "Needed to build the driver. Install it, then come back here." = "Nécessaire pour compiler le pilote. Installez-le, puis revenez ici.";
 "Open brew.sh" = "Ouvrir brew.sh";
 "Settings…" = "Réglages…";
+"Appearance" = "Apparence";
+"Same as the Mac" = "Comme le Mac";
+"Light" = "Claire";
+"Dark" = "Sombre";
