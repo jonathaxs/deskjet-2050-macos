@@ -54,7 +54,9 @@ enum Printer {
                 level: supply.level >= 0 ? Int(supply.level) : nil
             )
         }
-        return .levels(cartridges, lowThreshold: Int(levels.low_threshold))
+        // Black first, then color, whatever order the printer reports them in.
+        let sorted = cartridges.filter { $0.label == "K" } + cartridges.filter { $0.label != "K" }
+        return .levels(sorted, lowThreshold: Int(levels.low_threshold))
     }
 
     /// Turns a fixed C char array into a String.

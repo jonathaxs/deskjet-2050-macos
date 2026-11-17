@@ -24,8 +24,10 @@ cp "$BIN" "$APP/Contents/MacOS/$EXECUTABLE"
 # Translations (en, pt-BR, es, fr, it, de, nl, pl, ru, tr, ar, id, zh-Hans). Kept out of SwiftPM resources so they sit in Contents/Resources, where
 # SwiftUI looks by default and where the code signature covers them.
 cp -R "$APP_DIR/Resources/"*.lproj "$APP/Contents/Resources/"
-# Icon drawn by scripts/make-icon.swift.
-cp "$APP_DIR/Resources/AppIcon.icns" "$APP/Contents/Resources/"
+# Icons drawn by scripts/make-icon.swift: Assets.car has the light, dark and tinted looks for macOS 26 and
+# later, AppIcon.icns is the light one for older versions, and PrinterIcon-*.png sit next to the printer name.
+cp "$APP_DIR/Resources/AppIcon.icns" "$APP_DIR/Resources/Assets.car" "$APP_DIR/Resources/"PrinterIcon-*.png \
+    "$APP/Contents/Resources/"
 # The driver folder, without build output or downloads. The app copies it to Application Support and
 # opens Install.command / Uninstall.command from there in Terminal (see DriverModel.swift).
 rsync -a --exclude build --exclude downloads --exclude .DS_Store "$APP_DIR/../driver/" "$APP/Contents/Resources/driver/"
@@ -56,6 +58,8 @@ cat > "$APP/Contents/Info.plist" <<EOF
     <key>CFBundleExecutable</key>
     <string>$EXECUTABLE</string>
     <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleIconName</key>
     <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>$BUNDLE_ID</string>

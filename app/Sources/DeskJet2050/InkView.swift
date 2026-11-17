@@ -402,17 +402,28 @@ struct NotFoundHelp: View {
     }
 }
 
+/// The app icon's tile, light or dark to match the window. Falls back to a symbol when run outside the
+/// app bundle (swift run).
+struct PrinterIcon: View {
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        let name = scheme == .dark ? "PrinterIcon-dark" : "PrinterIcon-light"
+        if let image = NSImage(named: name) {
+            Image(nsImage: image).resizable().interpolation(.none).frame(width: 42, height: 42)
+        } else {
+            Image(systemName: "printer.fill").font(.system(size: 22)).frame(width: 40, height: 40)
+        }
+    }
+}
+
 /// Printer icon, name and connection state, with Refresh and the last update on the right.
 struct PrinterRow: View {
     let model: InkModel
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "printer.fill")
-                .font(.system(size: 22))
-                .foregroundStyle(.white)
-                .frame(width: 40, height: 40)
-                .background(.gray.gradient, in: RoundedRectangle(cornerRadius: 9))
+            PrinterIcon()
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: "HP Deskjet 2050").font(.headline)
                 HStack(spacing: 6) {

@@ -33,8 +33,8 @@ final class InkModel {
 
     /// Rows shown with grey bars while there is no reading.
     static let placeholder = [
-        Cartridge(label: "CMY", name: "Tri-color", state: "", level: nil),
         Cartridge(label: "K", name: "Black", state: "", level: nil),
+        Cartridge(label: "CMY", name: "Tri-color", state: "", level: nil),
     ]
 
     /// For previews and screenshots: a model that already has a reading.

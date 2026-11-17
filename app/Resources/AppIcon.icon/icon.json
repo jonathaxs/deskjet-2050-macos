@@ -1,0 +1,26 @@
+{
+  "fill-specializations" : [
+    { "value" : { "linear-gradient" : [ "srgb:1.00000,1.00000,1.00000,1.00000", "srgb:0.85098,0.85490,0.87059,1.00000" ] } },
+    { "appearance" : "dark", "value" : { "linear-gradient" : [ "srgb:0.18039,0.18039,0.18824,1.00000", "srgb:0.08627,0.08627,0.09412,1.00000" ] } }
+  ],
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "printer-light.png",
+          "name" : "printer-light",
+          "hidden-specializations" : [ { "value" : false }, { "appearance" : "dark", "value" : true }, { "appearance" : "tinted", "value" : true } ]
+        },
+        {
+          "image-name" : "printer-dark.png",
+          "name" : "printer-dark",
+          "hidden-specializations" : [ { "value" : true }, { "appearance" : "dark", "value" : false }, { "appearance" : "tinted", "value" : false } ]
+        }
+      ],
+      "shadow" : { "kind" : "none", "opacity" : 0 },
+      "specular" : false,
+      "translucency" : { "enabled" : false, "value" : 0 }
+    }
+  ],
+  "supported-platforms" : { "squares" : [ "macOS" ] }
+}
