@@ -386,6 +386,7 @@ struct NotFoundHelp: View {
                 step(3, "Still not found? In Privacy & Security, check “Allow accessories to connect”.")
                 Spacer()
                 Button("Open…") { NSWorkspace.shared.open(Self.securitySettings) }
+                    .glassButtons()
                     .help(Text("Opens Privacy & Security in System Settings"))
             }
         } header: {
